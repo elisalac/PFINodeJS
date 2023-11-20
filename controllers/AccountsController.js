@@ -173,5 +173,5 @@ export default class AccountsController extends Controller {
             super.remove(id);
     }
 
-    // TO DO: Add functions block, promote and add
+    // TO DO: Add functions block, promote and add/get
 }
