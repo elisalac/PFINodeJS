@@ -29,7 +29,7 @@ export default class APIServer {
         this.middlewaresPipeline.add(router.Registered_EndPoint);
         this.middlewaresPipeline.add(router.API_EndPoint);
     }
-    
+
     async handleHttpRequest(req, res) {
         this.markRequestProcessStartTime();
         this.httpContext = await HttpContext.create(req, res);
@@ -45,7 +45,8 @@ export default class APIServer {
         log(FgGreen, "************************************");
         log(FgGreen, "* API SERVER - version beta - 2.00 *");
         log(FgGreen, "************************************");
-        log(FgGreen, "* Author: Nicolas Chourot          *");
+        log(FgGreen, "* Authors: William Sauvé           *");
+        log(FgGreen, "*          Elisa Lacombe           *");
         log(FgGreen, "* Lionel-Groulx College            *");
         log(FgGreen, "* Release date: november 2023      *");
         log(FgGreen, "************************************");
