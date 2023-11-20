@@ -172,4 +172,6 @@ export default class AccountsController extends Controller {
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user()))
             super.remove(id);
     }
+
+    // TO DO: Add functions block and promote 
 }
