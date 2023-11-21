@@ -145,7 +145,7 @@ function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
 function updateHeader() {
-    let title = "Connexion";
+    let title = "";
     $("#header").append($(`<div id='photoTitleContainer'><img id='photoTitle' src='PhotosManager/favicon.ico'/></div><h2>${title}</h2>`));
 }
 function renderAbout() {
