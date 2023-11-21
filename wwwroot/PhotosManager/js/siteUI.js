@@ -146,7 +146,7 @@ function restoreContentScrollPosition() {
 }
 function updateHeader() {
     let title = "Connexion";
-    $("#header").append($(`<img id='photoTitleContainer' src='PhotosManager/favicon.ico'/><h2>${title}</h2>`));
+    $("#header").append($(`<div id='photoTitleContainer'><img id='photoTitle' src='PhotosManager/favicon.ico'/></div><h2>${title}</h2>`));
 }
 function renderAbout() {
     timeout();
