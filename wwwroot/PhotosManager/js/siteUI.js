@@ -1,7 +1,7 @@
-import { getLogger } from "nodemailer/lib/shared";
-import HttpContext from "../../../httpContext";
-import User from "../../../models/user";
-import { makeVerifyCode } from "../../../utilities";
+//import { getLogger } from "nodemailer/lib/shared";
+//import HttpContext from "../../../httpContext";
+//import User from "../../../models/user";
+//import { makeVerifyCode } from "../../../utilities";
 
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,10 +11,13 @@ Init_UI();
 function Init_UI() {
     renderLogin();
 }
-function renderLogin(loginMessage = "") {
-    let Email = "", EmailError = "", passwordError = "";
+function renderLogin() {
+    let Email = "", EmailError = API.currentHttpError, passwordError = "",loginMessage = "";
     eraseContent();
-    updateHeader("Connexion", "createProfil");
+    updateHeader("Connexion", "Login");
+    if (EmailError == undefined) {
+        EmailError = "";
+    }
     $("#content").append($(`<h3>${loginMessage}</h3>
     <form class="form" id="loginForm">
     <input type='email'
@@ -47,10 +50,10 @@ function renderLogin(loginMessage = "") {
         let passy = $("#pass").val();
         let mail = $("#mail").val();
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-
+        API.login(mail, passy)
         //if(code verified exists) opens verify code page
         //else login
-        API.login(mail, passy)
+        
     });
 
 }
@@ -158,9 +161,73 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
-function updateHeader(title) {
+function updateHeader(title, type) {
     $("#header").empty();
-    $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2> <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+    if (type == 'createProfil'|| type == 'Login') {
+        $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+        <div class="dropdown ms-auto dropdownLayout"> 
+            <div data-bs-toggle="dropdown" aria-expanded="false"> 
+                <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
+            </div>
+            <div class="dropdown-menu noselect">
+            <span class="dropdown-item" id="loginCmd"> 
+                <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion 
+            </span>
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="aboutCmd"> 
+                <i class="menuIcon fa fa-info-circle mx-2" id='aboutCmd'></i> À propos... </span>
+            </div> 
+        </div>`));
+    }
+    else if (type == "connected") {
+        if (API.retrieveLoggedUser() != undefined) {
+            let user = API.retrieveLoggedUser();
+            console.log(user);
+            $("#header").append($(`
+            <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+            <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
+             <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+        }
+    }
+    else if( type =="about")
+    {
+        if (API.retrieveLoggedUser() != undefined) {
+            let user = API.retrieveLoggedUser();
+            console.log(user);
+            $("#header").append($(`
+            <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+            <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
+             <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+        }
+        else
+        {
+            $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+            <div class="dropdown ms-auto dropdownLayout"> 
+                <div data-bs-toggle="dropdown" aria-expanded="false"> 
+                    <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
+                </div>
+                <div class="dropdown-menu noselect">
+                <span class="dropdown-item" id="loginCmd"> 
+                    <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion 
+                </span>
+                <div class="dropdown-divider"></div> 
+                <span class="dropdown-item" id="aboutCmd"> 
+                    <i class="menuIcon fa fa-info-circle mx-2" id='aboutCmd'></i> À propos... </span>
+                </div> 
+            </div>`));
+        }
+    }
+    $('#loginCmd').on('click', renderLogin); 
+    $('#aboutCmd').on('click', renderAbout);
+    $('#logoutCmd').on('click', renderlogout);
+
+
+}
+function renderlogout()
+{
+    API.logout()
+    updateHeader("Connexion",'Login');
+    renderLogin()
 }
 function getFormData($form) {
     const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
@@ -173,12 +240,19 @@ function getFormData($form) {
 async function createProfil(profil) {
     let result = await API.register(profil)
     if (result) {
-        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour réccupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.",);
+        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour réccupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
     }
     else {
         //king
     }
 
+}
+function renderImages()
+{
+    $("#content").append(
+        $(`
+        <h2>Gestionnaire de photos</h2>
+        `))
 }
 function renderAbout() {
     timeout();
