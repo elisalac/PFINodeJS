@@ -6,7 +6,8 @@ Init_UI();
 function Init_UI() {
     renderLogin();
 }
-function renderLogin(loginMessage = "",Email = "",EmailError = "",passwordError = "") {
+function renderLogin(loginMessage = "") {
+    let Email = "",EmailError = "",passwordError = "";
     eraseContent();
     updateHeader("Connexion", "createProfil");
     $("#content").append($(`<h3>${loginMessage}</h3>
@@ -42,7 +43,6 @@ function renderLogin(loginMessage = "",Email = "",EmailError = "",passwordError 
         let mail = $("#mail").val();
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
         API.login(mail,passy)
-
     });
     
 }
@@ -150,11 +150,6 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
-<<<<<<< Updated upstream
-function updateHeader() {
-    let title = "";
-    $("#header").append($(`<div id='photoTitleContainer'><img id='photoTitle' src='PhotosManager/favicon.ico'/></div><h2>${title}</h2>`));
-=======
 function updateHeader(title) {
     $("#header").empty();
     $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2> <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
@@ -172,14 +167,13 @@ async function createProfil(profil)
     let result =  await API.register(profil)
     if(result)
     {
-        renderLogin();
+        renderLogin("Veuillez aller chercher votre code pour vous connecter!",);
     }
     else
     {
         //king
     }
     
->>>>>>> Stashed changes
 }
 function renderAbout() {
     timeout();
