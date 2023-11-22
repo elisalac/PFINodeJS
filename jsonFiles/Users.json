@@ -24,5 +24,19 @@
             "writeAccess": 2
         },
         "VerifyCode": "verified"
+    },
+    {
+        "Id": "f621ec90-88c4-11ee-b5ff-05fa5a22baef",
+        "Email": "tarejel958@ikanid.com",
+        "Password": "king44",
+        "Name": "William",
+        "Avatar": "f62213a0-88c4-11ee-b5ff-05fa5a22baef.png",
+        "Created": 1700609002,
+        "Authorizations": {
+            "readAccess": 1,
+            "writeAccess": 1
+        },
+        "VerifyCode": "verified"
     }
+    
 ]

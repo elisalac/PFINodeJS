@@ -6,16 +6,14 @@ Init_UI();
 function Init_UI() {
     renderLogin();
 }
-function renderLogin() {
+function renderLogin(loginMessage = "",Email = "",EmailError = "",passwordError = "") {
     eraseContent();
-    let loginMessage = ""
-    let Email = ""
-    let EmailError = ""
-    let passwordError = ""
+    updateHeader("Connexion", "createProfil");
     $("#content").append($(`<h3>${loginMessage}</h3>
     <form class="form" id="loginForm">
     <input type='email'
     name='Email'
+    id='mail'
     class="form-control"
     required
     RequireMessage = 'Veuillez entrer votre courriel'
@@ -24,6 +22,7 @@ function renderLogin() {
     value='${Email}'>
     <span style='color:red'>${EmailError}</span>
     <input type='password'
+    id = 'pass'
     name='Password'
     placeholder='Mot de passe'
     class="form-control"
@@ -38,14 +37,21 @@ function renderLogin() {
     </div>
     `))
     $('#createProfilCmd').on('click', renderCreateAccount);
+    $('#loginForm').on("submit", function (event) {
+        let passy = $("#pass").val();
+        let mail = $("#mail").val();
+        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
+        API.login(mail,passy)
+
+    });
+    
 }
 
 function renderCreateAccount() {
-    //noTimeout(); // ne pas limiter le temps d’inactivité
+    noTimeout(); // ne pas limiter le temps d’inactivité
     eraseContent(); // effacer le conteneur #content
-    //UpdateHeader("Inscription", "createProfil"); // mettre à jour l’entête et menu
+    updateHeader("Inscription", "createProfil"); // mettre à jour l’entête et menu
     $("#newPhotoCmd").hide(); // camouffler l’icone de commande d’ajout de photo
-
     $("#content").append($(`
     <form class="form" id="createProfilForm"'>
     <fieldset>
@@ -114,8 +120,8 @@ function renderCreateAccount() {
     </div>
     `))
     $('#loginCmd').on('click', renderLogin); // call back sur clic
-    //initFormValidation();
-    //initImageUploaders();
+    initFormValidation();
+    initImageUploaders();
     $('#abortCmd').on('click', renderLogin); // call back sur clic
     //// ajouter le mécanisme de vérification de doublon de courriel
     //addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
@@ -133,7 +139,7 @@ function renderCreateAccount() {
 
 function showWaitingGif() {
     eraseContent();
-    $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='images/Loading_icon.gif' /></div>'"));
+    $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='./Loading_icon.gif' /></div>'"));
 }
 function eraseContent() {
     $("#content").empty();
@@ -144,15 +150,42 @@ function saveContentScrollPosition() {
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
+<<<<<<< Updated upstream
 function updateHeader() {
     let title = "";
     $("#header").append($(`<div id='photoTitleContainer'><img id='photoTitle' src='PhotosManager/favicon.ico'/></div><h2>${title}</h2>`));
+=======
+function updateHeader(title) {
+    $("#header").empty();
+    $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2> <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+}
+function getFormData($form) {
+    const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
+    var jsonObject = {};
+    $.each($form.serializeArray(), (index, control) => {
+        jsonObject[control.name] = control.value.replace(removeTag, "");
+    });
+    return jsonObject;
+}
+async function createProfil(profil)
+{
+    let result =  await API.register(profil)
+    if(result)
+    {
+        renderLogin();
+    }
+    else
+    {
+        //king
+    }
+    
+>>>>>>> Stashed changes
 }
 function renderAbout() {
     timeout();
     saveContentScrollPosition();
     eraseContent();
-    UpdateHeader("À propos...", "about");
+    updateHeader("À propos...", "about");
 
     $("#content").append(
         $(`
@@ -172,3 +205,4 @@ function renderAbout() {
             </div>
         `))
 }
+
