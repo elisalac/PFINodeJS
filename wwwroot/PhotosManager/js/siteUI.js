@@ -1,3 +1,8 @@
+import { getLogger } from "nodemailer/lib/shared";
+import HttpContext from "../../../httpContext";
+import User from "../../../models/user";
+import { makeVerifyCode } from "../../../utilities";
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -7,7 +12,7 @@ function Init_UI() {
     renderLogin();
 }
 function renderLogin(loginMessage = "") {
-    let Email = "",EmailError = "",passwordError = "";
+    let Email = "", EmailError = "", passwordError = "";
     eraseContent();
     updateHeader("Connexion", "createProfil");
     $("#content").append($(`<h3>${loginMessage}</h3>
@@ -42,9 +47,12 @@ function renderLogin(loginMessage = "") {
         let passy = $("#pass").val();
         let mail = $("#mail").val();
         event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-        API.login(mail,passy)
+
+        //if(code verified exists) opens verify code page
+        //else login
+        API.login(mail, passy)
     });
-    
+
 }
 
 function renderCreateAccount() {
@@ -162,18 +170,15 @@ function getFormData($form) {
     });
     return jsonObject;
 }
-async function createProfil(profil)
-{
-    let result =  await API.register(profil)
-    if(result)
-    {
-        renderLogin("Veuillez aller chercher votre code pour vous connecter!",);
+async function createProfil(profil) {
+    let result = await API.register(profil)
+    if (result) {
+        renderLogin("Votre compte a été créé. Veuillez prendre vos courriels pour réccupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.",);
     }
-    else
-    {
+    else {
         //king
     }
-    
+
 }
 function renderAbout() {
     timeout();
@@ -191,7 +196,7 @@ function renderAbout() {
                     d'interface utilisateur monopage réactive.
                 </p>
                 <p>
-                    Auteur: Nicolas Chourot
+                    Auteur: William Sauvé et Elisa Lacombe
                 </p>
                 <p>
                     Collège Lionel-Groulx, automne 2023
