@@ -1,7 +1,7 @@
 //import { getLogger } from "nodemailer/lib/shared";
-//import HttpContext from "../../../httpContext";
-//import User from "../../../models/user";
-//import { makeVerifyCode } from "../../../utilities";
+// import HttpContext from "../httpContext";
+// import User from "../models/user";
+// import { makeVerifyCode } from "../utilities";
 
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9,7 +9,20 @@ let contentScrollPosition = 0;
 Init_UI();
 
 function Init_UI() {
-    renderLogin();
+    let user = API.retrieveLoggedUser();
+    if( user == null)
+    {
+        renderLogin();
+    }
+    else if(user.VerifyCode == 'verified')
+    {
+        renderImages();
+    }
+    else
+    {
+        renderVerifyForm();
+    }
+    
 }
 function renderLogin() {
     let Email = "", EmailError = API.currentHttpError, passwordError = "",loginMessage = "";
@@ -46,16 +59,65 @@ function renderLogin() {
     </div>
     `))
     $('#createProfilCmd').on('click', renderCreateAccount);
-    $('#loginForm').on("submit", function (event) {
-        let passy = $("#pass").val();
-        let mail = $("#mail").val();
-        event.preventDefault();// empêcher le fureteur de soumettre une requête de soumission
-        API.login(mail, passy)
-        //if(code verified exists) opens verify code page
-        //else login
+    $('#loginForm').on("submit", async function (event) {
+        let loginInfo= getFormData($('#loginForm'))
+        event.preventDefault();
+        showWaitingGif();
+        let result = await API.login(loginInfo.Email,loginInfo.Password)
+        if(result)
+        {
+            let code = await API.retrieveLoggedUser();
+            console.log(code.VerifyCode)
+            if(code.VerifyCode == "verified")
+            {
+                renderVerifyForm();
+            }
+            else{
+                renderImages();
+            }
+            
+        }
+        else
+        {
+            renderAbout();
+        }
         
     });
 
+}
+function renderVerifyForm()
+{
+    eraseContent(); // effacer le conteneur #content
+    updateHeader("Vérification", "verif");
+    $("#content").append($(`
+   
+    <form class="form" id="verifyForm">
+    <h5>Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>/
+    <input type='text'
+    id='code'
+    name='Code'
+    class="form-control"
+    placeholder="Code de vérification de courriel">
+    <hr>
+    <button class="form-control btn-primary" id="verifyCmd">Vérifier</button>
+    </form>
+    `))
+    $('#verifyCmd').on('submit',async function(event){
+        let code= getFormData($('#verifyForm'))
+        console.log(code)
+        event.preventDefault();
+        let userid = API.retrieveLoggedUser().Id;
+        let result = await API.verifyEmail(userid,code.Code)
+        if(result)
+        {
+            renderImages()
+        }
+        else
+        {
+            API.logout()
+            renderLogin()//erreur c'est produite
+        }
+    });
 }
 
 function renderCreateAccount() {
@@ -135,7 +197,7 @@ function renderCreateAccount() {
     initImageUploaders();
     $('#abortCmd').on('click', renderLogin); // call back sur clic
     //// ajouter le mécanisme de vérification de doublon de courriel
-    //addConflictValidation(API.checkConflictURL(), 'Email', 'saveUser');
+    addConflictValidation(API.checkConflictURL(), 'Email', 'saveUserCmd');
     //// call back la soumission du formulaire
     $('#createProfilForm').on("submit", function (event) {
         let profil = getFormData($('#createProfilForm'));
@@ -147,7 +209,6 @@ function renderCreateAccount() {
     });
 
 }
-
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='./Loading_icon.gif' /></div>'"));
@@ -182,22 +243,57 @@ function updateHeader(title, type) {
     else if (type == "connected") {
         if (API.retrieveLoggedUser() != undefined) {
             let user = API.retrieveLoggedUser();
-            console.log(user);
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
             <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
         }
     }
+    else if(type == 'verif')
+    {
+        $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+        <div class="dropdown ms-auto dropdownLayout"> 
+            <div data-bs-toggle="dropdown" aria-expanded="false"> 
+                <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
+            </div>
+            <div class="dropdown-menu noselect">
+            <span class="dropdown-item" id="loginCmd"> 
+                <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion 
+            </span>
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="aboutCmd"> 
+                <i class="menuIcon fa fa-info-circle mx-2" id='aboutCmd'></i> À propos... </span>
+            </div> 
+        </div>`));
+    }
     else if( type =="about")
     {
-        if (API.retrieveLoggedUser() != undefined) {
-            let user = API.retrieveLoggedUser();
-            console.log(user);
+        let user = API.retrieveLoggedUser()
+        if (user != null ) {
+            if(user.VerifyCode == 'verified')
+            {
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
             <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+            }
+            else
+            {
+                $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+                <div class="dropdown ms-auto dropdownLayout"> 
+                    <div data-bs-toggle="dropdown" aria-expanded="false"> 
+                        <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
+                    </div>
+                    <div class="dropdown-menu noselect">
+                    <span class="dropdown-item" id="loginCmd"> 
+                        <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion 
+                    </span>
+                    <div class="dropdown-divider"></div> 
+                    <span class="dropdown-item" id="aboutCmd"> 
+                        <i class="menuIcon fa fa-info-circle mx-2" id='aboutCmd'></i> À propos... </span>
+                    </div> 
+                </div>`));
+            }
         }
         else
         {
@@ -208,7 +304,7 @@ function updateHeader(title, type) {
                 </div>
                 <div class="dropdown-menu noselect">
                 <span class="dropdown-item" id="loginCmd"> 
-                    <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion 
+                    <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion 
                 </span>
                 <div class="dropdown-divider"></div> 
                 <span class="dropdown-item" id="aboutCmd"> 
@@ -249,6 +345,7 @@ async function createProfil(profil) {
 }
 function renderImages()
 {
+    updateHeader('King','about')
     $("#content").append(
         $(`
         <h2>Gestionnaire de photos</h2>
