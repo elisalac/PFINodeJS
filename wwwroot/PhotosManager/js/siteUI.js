@@ -339,10 +339,11 @@ async function createProfil(profil) {
 
 }
 function renderImages() {
+    timeout();
     updateHeader('Liste des photos', 'connected')
     $("#content").append(
         $(`
-        <h2>Gestionnaire de photos</h2>
+        <h2 style="margin-left:20px; margin-top:20px">Gestionnaire de photos</h2>
         `))
 }
 function renderAbout() {
