@@ -39,7 +39,7 @@
     border-radius: 9px;
     background-color: white;
     display: grid;
-    grid-template-columns: 50px auto auto;
+    grid-template-columns: 50px 1fr 50px 40px;
     width: 100%;
     height: auto;
     align-items: center;
@@ -47,7 +47,7 @@
 }
 
 .headerMenusContainer {
-    display:grid;
+    display: grid;
     grid-template-columns: auto 50px 30px;
     align-items: center;
 }
@@ -99,7 +99,7 @@
 
 .menuIcon {
     -webkit-text-fill-color: rgb(0, 87, 204);
-    width:20px;
+    width: 20px;
 }
 
 .appLogo {
@@ -125,6 +125,7 @@
         height: 270px;
     }
 }
+
 .form {
     padding: 20px;
     max-width: 350px;
@@ -134,7 +135,7 @@
 }
 
 .form input {
-    margin:20px;
+    margin: 20px;
 }
 
 .cancel {
@@ -181,16 +182,16 @@
 
 textarea,
 input {
-    margin:0px !important;
+    margin: 0px !important;
     margin-top: 20px !important;
-    
+
 }
 
 input[type=checkbox] {
     scale: 1.3;
     margin: 3px !important;
-    margin-top:20px !important;
-    margin-bottom:10px !important;
+    margin-top: 20px !important;
+    margin-bottom: 10px !important;
 }
 
 a {
@@ -245,6 +246,6 @@ legend {
     grid-template-columns: 25px auto !important;
 }
 
-div2{
+div2 {
     border: 1px solid red;
 }

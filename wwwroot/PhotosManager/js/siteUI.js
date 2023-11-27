@@ -10,21 +10,18 @@ Init_UI();
 
 function Init_UI() {
     let user = API.retrieveLoggedUser();
-    if( user == null)
-    {
+    if (user == null) {
         renderLogin();
     }
-    else if(user.VerifyCode == 'verified')
-    {
+    else if (user.VerifyCode == 'verified') {
         renderImages();
     }
-    else
-    {
+    else {
         renderVerifyForm();
     }
-    
+
 }
-function renderLogin(Email = "", EmailError = "", passwordError = "",loginMessage = "") {
+function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
     eraseContent();
     updateHeader("Connexion", "Login");
     if (EmailError == undefined) {
@@ -59,74 +56,65 @@ function renderLogin(Email = "", EmailError = "", passwordError = "",loginMessag
     `))
     $('#createProfilCmd').on('click', renderCreateAccount);
     $('#loginForm').on("submit", async function (event) {
-        let loginInfo= getFormData($('#loginForm'))
+        let loginInfo = getFormData($('#loginForm'))
         event.preventDefault();
         showWaitingGif();
-        let result = await API.login(loginInfo.Email,loginInfo.Password)
-        if(result)
-        {
+        let result = await API.login(loginInfo.Email, loginInfo.Password)
+        if (result) {
             let code = await API.retrieveLoggedUser();
             console.log(code.VerifyCode)
-            if(code.VerifyCode != "verified")
-            {
+            if (code.VerifyCode != "verified") {
                 renderVerifyForm();
             }
-            else{
+            else {
                 renderImages();
             }
         }
-        else
-        {
-            switch(API.currentStatus)
-            {
+        else {
+            switch (API.currentStatus) {
                 case 481:
-                    {renderLogin('','Courriel introuvable');break;}
+                    { renderLogin('', 'Courriel introuvable'); break; }
                 case 482:
-                    {renderLogin(loginInfo.Email,'','Mot de passe incorrect');break;}
+                    { renderLogin(loginInfo.Email, '', 'Mot de passe incorrect'); break; }
                 default:
                     {
                         //faire fonction pour gérer pas de connexion avec serveur(fonction render comme dans énoncé)
                     }
             }
         }
-        
+
     });
 
 }
-function renderVerifyForm()
-{
+function renderVerifyForm() {
     eraseContent(); // effacer le conteneur #content
     updateHeader("Vérification", "verif");
     $("#content").append($(`
-   
-    <form class="form" id="verifyForm">
-    <h5>Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>
-    <input type='text'
-    id='code'
-    name='Code'
-    class="form-control"
-    placeholder="Code de vérification de courriel">
-    <hr>
-    <div class="form">
-    <hr>
-    <button class="form-control btn-info" id="verifyCmd">Caliss</button>
+    <div class="content" style="text-align:center">
+        <h5 style="margin-top:30px">Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>
+        <form class="form" id="verifyForm">
+            <input type='text'
+            id='code'
+            name='Code'
+            class="form-control"
+            placeholder="Code de vérification de courriel">
+        </form>
+        <div class="form">
+            <button class="form-control btn-primary" id="verifyCmd">Caliss</button>
+        </div>
     </div>
-    </form>
-    
     `))
     $('#verifyCmd').on("click", async function (event) {
-        let code= getFormData($('#verifyForm'))
+        let code = getFormData($('#verifyForm'))
         console.log(code)
         event.preventDefault();
         let userid = API.retrieveLoggedUser().Id;
-        console.log(userid,code)
-        let result = await API.verifyEmail(userid,code.Code)
-        if(result)
-        {
+        console.log(userid, code)
+        let result = await API.verifyEmail(userid, code.Code)
+        if (result) {
             renderImages()
         }
-        else
-        {
+        else {
             API.logout()
             renderLogin()//erreur c'est produite
         }
@@ -208,7 +196,7 @@ function renderCreateAccount() {
     $('#loginCmd').on('click', renderLogin); // call back sur clic
     initFormValidation();
     initImageUploaders();
-    $('#abortCmd').on('click', function(){
+    $('#abortCmd').on('click', function () {
         renderLogin();
     }); // call back sur clic
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUserCmd');
@@ -237,7 +225,7 @@ function restoreContentScrollPosition() {
 }
 function updateHeader(title, type) {
     $("#header").empty();
-    if (type == 'createProfil'|| type == 'Login') {
+    if (type == 'createProfil' || type == 'Login') {
         $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
         <div class="dropdown ms-auto dropdownLayout"> 
             <div data-bs-toggle="dropdown" aria-expanded="false"> 
@@ -258,12 +246,11 @@ function updateHeader(title, type) {
             let user = API.retrieveLoggedUser();
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
-            <img id='avatarUser' class='UserAvatar' src=''>
+            <img id='UserAvatarSmall' class='UserAvatar' src='${user.Avatar}'>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
         }
     }
-    else if(type == 'verif')
-    {
+    else if (type == 'verif') {
         $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
         <div class="dropdown ms-auto dropdownLayout"> 
             <div data-bs-toggle="dropdown" aria-expanded="false"> 
@@ -279,19 +266,16 @@ function updateHeader(title, type) {
             </div> 
         </div>`));
     }
-    else if( type =="about")
-    {
+    else if (type == "about") {
         let user = API.retrieveLoggedUser()
-        if (user != null ) {
-            if(user.VerifyCode == 'verified')
-            {
-            $("#header").append($(`
+        if (user != null) {
+            if (user.VerifyCode == 'verified') {
+                $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
-            <img id='avatarUser' class='UserAvatarSmall' src='./favicon.ico'>
+            <img id='avatarUser' class='UserAvatarSmall' src='${user.Avatar}'>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
             }
-            else
-            {
+            else {
                 $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
                 <div class="dropdown ms-auto dropdownLayout"> 
                     <div data-bs-toggle="dropdown" aria-expanded="false"> 
@@ -308,8 +292,7 @@ function updateHeader(title, type) {
                 </div>`));
             }
         }
-        else
-        {
+        else {
             $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
             <div class="dropdown ms-auto dropdownLayout"> 
                 <div data-bs-toggle="dropdown" aria-expanded="false"> 
@@ -326,16 +309,15 @@ function updateHeader(title, type) {
             </div>`));
         }
     }
-    $('#loginCmd').on('click', renderLogin); 
+    $('#loginCmd').on('click', renderLogin);
     $('#aboutCmd').on('click', renderAbout);
     $('#logoutCmd').on('click', renderlogout);
 
 
 }
-function renderlogout()
-{
+function renderlogout() {
     API.logout()
-    updateHeader("Connexion",'Login');
+    updateHeader("Connexion", 'Login');
     renderLogin()
 }
 function getFormData($form) {
@@ -356,9 +338,8 @@ async function createProfil(profil) {
     }
 
 }
-function renderImages()
-{
-    updateHeader('King','about')
+function renderImages() {
+    updateHeader('Liste des photos', 'connected')
     $("#content").append(
         $(`
         <h2>Gestionnaire de photos</h2>
