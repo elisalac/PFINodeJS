@@ -24,8 +24,7 @@ function Init_UI() {
     }
     
 }
-function renderLogin() {
-    let Email = "", EmailError = API.currentHttpError, passwordError = "",loginMessage = "";
+function renderLogin(Email = "", EmailError = "", passwordError = "",loginMessage = "") {
     eraseContent();
     updateHeader("Connexion", "Login");
     if (EmailError == undefined) {
@@ -40,7 +39,7 @@ function renderLogin() {
     required
     RequireMessage = 'Veuillez entrer votre courriel'
     InvalidMessage = 'Courriel invalide'
-    placeholder="adresse de courriel"
+    placeholder="Courriel"
     value='${Email}'>
     <span style='color:red'>${EmailError}</span>
     <input type='password'
@@ -68,18 +67,27 @@ function renderLogin() {
         {
             let code = await API.retrieveLoggedUser();
             console.log(code.VerifyCode)
-            if(code.VerifyCode == "verified")
+            if(code.VerifyCode != "verified")
             {
                 renderVerifyForm();
             }
             else{
                 renderImages();
             }
-            
         }
         else
         {
-            renderAbout();
+            switch(API.currentStatus)
+            {
+                case 481:
+                    {renderLogin('','Courriel introuvable');break;}
+                case 482:
+                    {renderLogin(loginInfo.Email,'','Mot de passe incorrect');break;}
+                default:
+                    {
+                        //faire fonction pour gérer pas de connexion avec serveur(fonction render comme dans énoncé)
+                    }
+            }
         }
         
     });
@@ -92,21 +100,26 @@ function renderVerifyForm()
     $("#content").append($(`
    
     <form class="form" id="verifyForm">
-    <h5>Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>/
+    <h5>Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>
     <input type='text'
     id='code'
     name='Code'
     class="form-control"
     placeholder="Code de vérification de courriel">
     <hr>
-    <button class="form-control btn-primary" id="verifyCmd">Vérifier</button>
+    <div class="form">
+    <hr>
+    <button class="form-control btn-info" id="verifyCmd">Caliss</button>
+    </div>
     </form>
+    
     `))
-    $('#verifyCmd').on('submit',async function(event){
+    $('#verifyCmd').on("click", async function (event) {
         let code= getFormData($('#verifyForm'))
         console.log(code)
         event.preventDefault();
         let userid = API.retrieveLoggedUser().Id;
+        console.log(userid,code)
         let result = await API.verifyEmail(userid,code.Code)
         if(result)
         {
@@ -195,10 +208,10 @@ function renderCreateAccount() {
     $('#loginCmd').on('click', renderLogin); // call back sur clic
     initFormValidation();
     initImageUploaders();
-    $('#abortCmd').on('click', renderLogin); // call back sur clic
-    //// ajouter le mécanisme de vérification de doublon de courriel
+    $('#abortCmd').on('click', function(){
+        renderLogin();
+    }); // call back sur clic
     addConflictValidation(API.checkConflictURL(), 'Email', 'saveUserCmd');
-    //// call back la soumission du formulaire
     $('#createProfilForm').on("submit", function (event) {
         let profil = getFormData($('#createProfilForm'));
         delete profil.matchedPassword;
@@ -245,7 +258,7 @@ function updateHeader(title, type) {
             let user = API.retrieveLoggedUser();
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
-            <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
+            <img id='avatarUser' class='UserAvatar' src=''>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
         }
     }
@@ -257,7 +270,7 @@ function updateHeader(title, type) {
                 <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
             </div>
             <div class="dropdown-menu noselect">
-            <span class="dropdown-item" id="loginCmd"> 
+            <span class="dropdown-item" id="logoutCmd"> 
                 <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion 
             </span>
             <div class="dropdown-divider"></div> 
@@ -274,7 +287,7 @@ function updateHeader(title, type) {
             {
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
-            <img id='avatarUser' class='UserAvatar' src='./favicon.ico'>
+            <img id='avatarUser' class='UserAvatarSmall' src='./favicon.ico'>
              <div class="dropdown ms-auto dropdownLayout"> <div data-bs-toggle="dropdown" aria-expanded="false"> <i class="cmdIcon fa fa-ellipsis-vertical"></i> </div> <div class="dropdown-menu noselect"> <span class="dropdown-item" id="manageUserCm"> <i class="menuIcon fas fa-user-cog mx-2"></i> Gestion des usagers </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="logoutCmd"> <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion </span> <span class="dropdown-item" id="editProfilMenuCmd"> <i class="menuIcon fa fa-user-edit mx-2"></i> Modifier votre profil </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
             }
             else
@@ -303,7 +316,7 @@ function updateHeader(title, type) {
                     <i class="cmdIcon fa fa-ellipsis-vertical"></i> 
                 </div>
                 <div class="dropdown-menu noselect">
-                <span class="dropdown-item" id="loginCmd"> 
+                <span class="dropdown-item" id="logoutCmd"> 
                     <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion 
                 </span>
                 <div class="dropdown-divider"></div> 

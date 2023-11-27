@@ -32,7 +32,7 @@
         "Name": "William",
         "Avatar": "e83a1500-88db-11ee-a341-7d0316e63670.png",
         "Created": 1700618857,
-        "VerifyCode": 318275,
+        "VerifyCode": "verified",
         "Authorizations": {
             "readAccess": 1,
             "writeAccess": 1
