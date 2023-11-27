@@ -411,7 +411,7 @@ function renderImages() {
     updateHeader('Liste des photos', 'connected')
     $("#content").append(
         $(`
-        <h2 style="margin-left:20px; margin-top:20px">En construcion</h2>
+        <h2 style="margin-left:20px; margin-top:20px">En construction</h2>
         `))
 }
 function renderAbout() {
