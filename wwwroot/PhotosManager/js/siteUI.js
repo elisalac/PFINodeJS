@@ -3,6 +3,7 @@
 // import User from "../models/user";
 // import { makeVerifyCode } from "../utilities";
 
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -114,18 +115,16 @@ function renderVerifyForm() {
     </div>
     `))
     $('#verifyCmd').on("click", async function (event) {
-        let code = getFormData($('#verifyForm'))
-        console.log(code)
+        let code = getFormData($('#verifyForm'));
         event.preventDefault();
         let userid = API.retrieveLoggedUser().Id;
-        console.log(userid, code)
-        let result = await API.verifyEmail(userid, code.Code)
+        let result = await API.verifyEmail(userid, code.Code);
         if (result) {
-            renderImages()
+            renderImages();
         }
         else {
-            API.logout()
-            renderLogin()//erreur c'est produite
+            API.logout();
+            renderLogin();//erreur c'est produite
         }
     });
 }
@@ -547,4 +546,3 @@ function renderKill() {
     });
     $('#cancelCmd').on("click", renderModify);
 }
-
