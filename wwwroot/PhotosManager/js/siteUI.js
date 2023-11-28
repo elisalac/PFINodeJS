@@ -9,16 +9,7 @@ let contentScrollPosition = 0;
 Init_UI();
 
 function Init_UI() {
-    let user = API.retrieveLoggedUser();
-    if (user == null) {
-        renderLogin();
-    }
-    else if (user.VerifyCode == 'verified') {
-        renderImages();
-    }
-    else {
-        renderVerifyForm();
-    }
+    renderLogin();
 
 }
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
