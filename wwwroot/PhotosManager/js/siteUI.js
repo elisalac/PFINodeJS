@@ -101,7 +101,7 @@ function renderVerifyForm() {
     updateHeader("Vérification", "verif");
     $("#content").append($(`
     <div class="content" style="text-align:center">
-        <h5 style="margin-top:30px">Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h5>
+        <h5 style="margin-top:30px">Veuillez entrer le code de vérification que vous avez reçus par courriel</h5>
         <form class="form" id="verifyForm">
             <input type='text'
             id='code'
@@ -508,6 +508,8 @@ function renderModify() {
     `))
     $("#saveUserCmd").on("click", async function (event) {
         let profil = getFormData($('#editProfilForm'));
+        delete profil.matchedEmail;
+        delete profil.matchedPassword;
         event.preventDefault();
         showWaitingGif();
         let result = await API.modifyUserProfil(profil);
@@ -525,7 +527,7 @@ function renderKill() {
     eraseContent();
     $("#content").append($(`
     <div class="content" style="text-align:center">
-        <h4 style="margin-top:30px">Veuillez entrer le code de vérifiaction que vous avez reçus par courriel</h4>
+        <h4 style="margin-top:30px">Voulez-vous vraiment effacer votre compte?</h4>
         <div class="form">
             <button class="form-control btn-danger" id="deleteCmd">Effacer mon compte</button>
         </div>
