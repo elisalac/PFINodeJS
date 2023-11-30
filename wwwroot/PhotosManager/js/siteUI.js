@@ -3,6 +3,8 @@
 // import User from "../models/user";
 // import { makeVerifyCode } from "../utilities";
 
+import Authorizations from "../../../authorizations";
+
 
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +112,7 @@ function renderVerifyForm() {
             placeholder="Code de vérification de courriel">
         </form>
         <div class="form">
-            <button class="form-control btn-primary" id="verifyCmd">Caliss</button>
+            <button class="form-control btn-primary" id="verifyCmd">Vérifier</button>
         </div>
     </div>
     `))
@@ -252,6 +254,14 @@ function updateHeader(title, type) {
     else if (type == "connected") {
         if (API.retrieveLoggedUser() != undefined) {
             let user = API.retrieveLoggedUser();
+            let isAdmin = null;
+            if (user.Authorizations == Authorizations.admin()) {
+                isAdmin = `<span class="dropdown-item" id="manageUserCm">
+                <i class="menuIcon fas fa-user-cog mx-2"></i> 
+                Gestion des usagers 
+                </span>`;
+            }
+
             $("#header").append($(`
             <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
             <img id='UserAvatarSmall' class='UserAvatarSmall' src='${user.Avatar}'>
@@ -260,10 +270,7 @@ function updateHeader(title, type) {
             <i class="cmdIcon fa fa-ellipsis-vertical"></i>
             </div>
             <div class="dropdown-menu noselect">
-            <span class="dropdown-item" id="manageUserCm">
-            <i class="menuIcon fas fa-user-cog mx-2"></i> 
-            Gestion des usagers 
-            </span>
+            ${isAdmin}
             <div class="dropdown-divider"></div>
             <span class="dropdown-item" id="logoutCmd">
             <i class="menuIcon fa fa-sign-out mx-2"></i>
@@ -514,7 +521,7 @@ function renderModify() {
         showWaitingGif();
         let result = await API.modifyUserProfil(profil);
         if (result) {
-            renderLogin();
+            renderImages();
         }
     });
     $('#abortCmd').on('click', renderImages);
