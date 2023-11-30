@@ -377,11 +377,66 @@ function updateHeader(title, type) {
             </div>`));
         }
     }
+    else if (type == "UsersManager") {
+        `
+        <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+        <img id='UserAvatarSmall' class='UserAvatarSmall' src='${user.Avatar}'>
+        <div class="dropdown ms-auto dropdownLayout">
+        <div data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="cmdIcon fa fa-ellipsis-vertical"></i>
+        </div>
+        <div class="dropdown-menu noselect">
+        <span class="dropdown-item" id="manageUserCm">
+        <i class="menuIcon fas fa-user-cog mx-2"></i> 
+        Gestion des usagers 
+        </span>
+        <div class="dropdown-divider"></div>
+            <span class="dropdown-item" id="logoutCmd">
+            <i class="menuIcon fa fa-sign-out mx-2"></i>
+            Déconnexion 
+            </span>
+            <span class="dropdown-item" id="editProfilMenuCmd">
+            <i class="menuIcon fa fa-user-edit mx-2"></i>
+            Modifier votre profil
+            </span> <div class="dropdown-divider">
+            </div> <span class="dropdown-item" id="listPhotosMenuCmd">
+            <i class="menuIcon fa fa-image mx-2"></i>
+            Liste des photos 
+            </span>
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="sortByDateCmd"> 
+            <i class="menuIcon fa fa-check mx-2"></i>
+            <i class="menuIcon fa fa-calendar mx-2"></i> 
+            Photos par date de création 
+            </span> 
+            <span class="dropdown-item" id="sortByOwnersCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-users mx-2"></i> 
+            Photos par créateur 
+            </span> 
+            <span class="dropdown-item" id="sortByLikesCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Photos les plus aiméés 
+            </span> 
+            <span class="dropdown-item" id="ownerOnlyCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Mes photos 
+            </span> 
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="aboutCmd"> 
+            <i class="menuIcon fa fa-info-circle mx-2"></i> 
+            À propos... 
+            </span> 
+            </div> 
+            </div>`
+    }
     $('#loginCmd').on('click', renderLogin);
     $('#aboutCmd').on('click', renderAbout);
     $('#logoutCmd').on('click', renderlogout);
     $('#editProfilMenuCmd').on('click', renderModify);
-
+    $('#manageUserCm').on('click', renderUserManager);
 }
 
 function renderlogout() {
@@ -565,12 +620,21 @@ function renderKill() {
     $('#cancelCmd').on("click", renderModify);
 }
 
-function renderUserManager() {
+async function renderUserManager() {
     eraseContent();
-    updateHeader("Gestion des usagers", "Users");
+    updateHeader("Gestion des usagers", "UsersManager");
 
-    let users = API.GetAccounts();
-    $("#content").append($(`
-
+    let result = await API.GetAccounts();
+    let users = result.data;
+    users.forEach(user => {
+        $("#content").append($(`
+        <div class="UserLayout">
+            <img id="avatarUser" class="UserAvatar"src="${user.Avatar}"/>
+            <div class="UserInfo">
+                <span class="UserName">${user.Name}</span>
+                <span class="UserEmail">${user.Email}</span>
+            </div>
+        </div>
     `));
+    })
 }
