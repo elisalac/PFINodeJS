@@ -3,7 +3,6 @@
 // import User from "../models/user";
 // import { makeVerifyCode } from "../utilities";
 
-import Authorizations from "../../../authorizations";
 
 
 let contentScrollPosition = 0;
@@ -13,8 +12,8 @@ Init_UI();
 
 function Init_UI() {
     renderLogin();
-
 }
+
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
     eraseContent();
     updateHeader("Connexion", "Login");
@@ -220,19 +219,24 @@ function renderCreateAccount() {
     });
 
 }
+
 function showWaitingGif() {
     eraseContent();
     $("#content").append($("<div class='waitingGifcontainer'><img class='waitingGif' src='./Loading_icon.gif' /></div>'"));
 }
+
 function eraseContent() {
     $("#content").empty();
 }
+
 function saveContentScrollPosition() {
     contentScrollPosition = $("#content")[0].scrollTop;
 }
+
 function restoreContentScrollPosition() {
     $("#content")[0].scrollTop = contentScrollPosition;
 }
+
 function updateHeader(title, type) {
     $("#header").empty();
     if (type == 'createProfil' || type == 'Login') {
@@ -254,12 +258,13 @@ function updateHeader(title, type) {
     else if (type == "connected") {
         if (API.retrieveLoggedUser() != undefined) {
             let user = API.retrieveLoggedUser();
-            let isAdmin = null;
-            if (user.Authorizations == Authorizations.admin()) {
+            let isAdmin = "";
+            if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
                 isAdmin = `<span class="dropdown-item" id="manageUserCm">
                 <i class="menuIcon fas fa-user-cog mx-2"></i> 
                 Gestion des usagers 
-                </span>`;
+                </span>
+                <div class="dropdown-divider"></div>`;
             }
 
             $("#header").append($(`
@@ -271,7 +276,6 @@ function updateHeader(title, type) {
             </div>
             <div class="dropdown-menu noselect">
             ${isAdmin}
-            <div class="dropdown-divider"></div>
             <span class="dropdown-item" id="logoutCmd">
             <i class="menuIcon fa fa-sign-out mx-2"></i>
             Déconnexion 
@@ -379,11 +383,13 @@ function updateHeader(title, type) {
     $('#editProfilMenuCmd').on('click', renderModify);
 
 }
+
 function renderlogout() {
     API.logout()
     updateHeader("Connexion", 'Login');
     renderLogin()
 }
+
 function getFormData($form) {
     const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
     var jsonObject = {};
@@ -392,6 +398,7 @@ function getFormData($form) {
     });
     return jsonObject;
 }
+
 async function createProfil(profil) {
     let result = await API.register(profil)
     if (result) {
@@ -402,6 +409,7 @@ async function createProfil(profil) {
     }
 
 }
+
 function renderImages() {
     timeout();
     eraseContent();
@@ -411,6 +419,7 @@ function renderImages() {
         <h2 style="margin-left:20px; margin-top:20px">En construction</h2>
         `))
 }
+
 function renderAbout() {
     timeout();
     saveContentScrollPosition();
@@ -554,4 +563,14 @@ function renderKill() {
         }
     });
     $('#cancelCmd').on("click", renderModify);
+}
+
+function renderUserManager() {
+    eraseContent();
+    updateHeader("Gestion des usagers", "Users");
+
+    let users = API.GetAccounts();
+    $("#content").append($(`
+
+    `));
 }

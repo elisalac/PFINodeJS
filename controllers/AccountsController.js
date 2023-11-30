@@ -170,6 +170,15 @@ export default class AccountsController extends Controller {
     // GET:account/remove/id
     remove(id) { // warning! this is not an API endpoint
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user()))
-            super.remove(id);
+            if (this.repository != null) {
+                if (this.HttpContext.path.id) {
+                    if (this.repository.remove(id))
+                        this.HttpContext.response.accepted();
+                    else
+                        this.HttpContext.response.notFound("Ressource not found.");
+                } else
+                    this.HttpContext.response.badRequest("The Id in the request url is rather not specified or syntactically wrong.");
+            } else
+                this.HttpContext.response.notImplemented();
     }
 }

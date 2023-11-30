@@ -63,18 +63,5 @@
             "readAccess": 1,
             "writeAccess": 1
         }
-    },
-    {
-        "Id": "59d4f2b0-8d42-11ee-a2a3-d1e82fc24bea",
-        "Email": "geyita3419@kxgif.com",
-        "Password": "aba123",
-        "Name": "aba",
-        "Avatar": "59d67950-8d42-11ee-a2a3-d1e82fc24bea.png",
-        "Created": 1701102661,
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        }
     }
 ]
