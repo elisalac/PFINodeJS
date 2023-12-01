@@ -380,7 +380,7 @@ function updateHeader(title, type) {
     else if (type == "UsersManager") {
         let user = API.retrieveLoggedUser();
         $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
-        <img id='UserAvatarSmall' class='UserAvatarSmall' src='${user.Avatar}'>
+        <img id='UserAvatarSmall' class='UserAvatarSmall' src='./images/adminLogo.png'>
         <div class="dropdown ms-auto dropdownLayout">
         <div data-bs-toggle="dropdown" aria-expanded="false">
             <i class="cmdIcon fa fa-ellipsis-vertical"></i>
@@ -658,13 +658,18 @@ async function renderUserManager() {
     let currentUserId = API.retrieveLoggedUser().Id;
     let result = await API.GetAccounts();
     let users = result.data;
-    let cssAdmin = "";
-    let cssBlock = "";
+    let buttonAdmin = "";
+    let buttonBlock = "";
     users.forEach((user) => {
         if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
-            cssAdmin = "cmdIconVisible fas fa-user-cog dodgerblueCmd";
+            buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd"/>';
         } else {
-            cssAdmin = "cmdIconVisible fas fa-user-alt dodgerblueCmd"
+            buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd"/>';
+        }
+        if (user.Authorizations.readAccess == 0 && user.Authorizations.writeAccess == 0) {
+            buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd" style="border-width:0px" id="blockCmd"/>'
+        } else {
+            buttonBlock = '<button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="unblockCmd"/>';
         }
         if (user.Id != currentUserId) {
             $("#content").append($(`
@@ -677,21 +682,31 @@ async function renderUserManager() {
                     </div>
                 </div>
                 <div class="UserCommandPanel">
-                    <button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="adminCmd"/>
-                    <button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="blockCmd"/>
+                    ${buttonAdmin}
+                    ${buttonBlock}
                     <button class="cmdIconVisible fas fa-user-slash goldenrodCmd" style="border-width:0px" id="removeCmd"/>
                 </div>
             </div>
             `));
         }
-        $('#adminCmd').on('click', function () {
+        $('#promoteCmd').on('click', function () {
             user.Authorizations.readAccess = 2;
             user.Authorizations.writeAccess = 2;
+        });
+        $('#demoteCmd').on('click', function () {
+            user.Authorizations.readAccess = 1;
+            user.Authorizations.writeAccess = 1;
         });
         $('#blockCmd').on('click', function () {
             user.Authorizations.readAccess = 0;
             user.Authorizations.writeAccess = 0;
         });
-        $('#removeCmd').on('click', renderKillAdmin(user));
+        $('#unblockCmd').on('click', function () {
+            user.Authorizations.readAccess = 1;
+            user.Authorizations.writeAccess = 1;
+        });
+        $('#removeCmd').on('click', function () {
+            renderKillAdmin(user);
+        });
     });
 }
