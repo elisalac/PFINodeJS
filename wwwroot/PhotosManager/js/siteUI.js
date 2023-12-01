@@ -623,6 +623,8 @@ function renderKill() {
 
 function renderKillAdmin(user) {
     eraseContent();
+    timeout();
+    updateHeader("Retrait de compte", "UsersManager");
     $("#content").append($(`
     <div class="content" style="text-align:center">
         <h4 style="margin-top:30px">Voulez-vous vraiment effacer cet usager et toutes ses photos?</h4>
@@ -662,9 +664,9 @@ async function renderUserManager() {
     let buttonBlock = "";
     users.forEach((user) => {
         if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
-            buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd"/>';
+            buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd" userId="' + user.Id + '"/>';
         } else {
-            buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd"/>';
+            buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd" userId="' + user.Id + '"/>';
         }
         if (user.Authorizations.readAccess == 0 && user.Authorizations.writeAccess == 0) {
             buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd" style="border-width:0px" id="blockCmd"/>'
@@ -689,14 +691,8 @@ async function renderUserManager() {
             </div>
             `));
         }
-        $('#promoteCmd').on('click', function () {
-            user.Authorizations.readAccess = 2;
-            user.Authorizations.writeAccess = 2;
-        });
-        $('#demoteCmd').on('click', function () {
-            user.Authorizations.readAccess = 1;
-            user.Authorizations.writeAccess = 1;
-        });
+
+
         $('#blockCmd').on('click', function () {
             user.Authorizations.readAccess = 0;
             user.Authorizations.writeAccess = 0;
@@ -708,5 +704,15 @@ async function renderUserManager() {
         $('#removeCmd').on('click', function () {
             renderKillAdmin(user);
         });
+    });
+    $('#promoteCmd').on('click', function () {
+        let userId = $(this).attr("userId");
+        console.log(API.getUserById(userId));
+        //user.Authorizations.readAccess = 2;
+        //user.Authorizations.writeAccess = 2;
+    });
+    $('#demoteCmd').on('click', function () {
+        user.Authorizations.readAccess = 1;
+        user.Authorizations.writeAccess = 1;
     });
 }

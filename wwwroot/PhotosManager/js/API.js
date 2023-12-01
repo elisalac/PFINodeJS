@@ -9,6 +9,22 @@ class API {
         this.currentStatus = 0;
         this.error = false;
     }
+
+    static getUserById(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/index?id=" + id,
+                contentType: 'application/json',
+                type: 'GET',
+                data: {},
+                success: (profil) => {
+                    resolve(profil);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
     static setHttpErrorState(xhr) {
         if (xhr.responseJSON)
             this.currentHttpError = xhr.responseJSON.error_description;
