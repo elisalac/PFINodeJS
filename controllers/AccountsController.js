@@ -185,6 +185,7 @@ export default class AccountsController extends Controller {
             let user = this.repository.get(id);
             user.Authorizations.readAccess = 2;
             user.Authorizations.writeAccess = 2;
+            this.HttpContext.response.accepted();
         } else {
             this.HttpContext.unAuthorized();
         }
