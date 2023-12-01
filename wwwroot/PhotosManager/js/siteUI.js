@@ -335,7 +335,7 @@ function updateHeader(title, type) {
         </div>`));
     }
     else if (type == "about") {
-        let user = API.retrieveLoggedUser()
+        let user = API.retrieveLoggedUser();
         if (user != null) {
             if (user.VerifyCode == 'verified') {
                 $("#header").append($(`
@@ -378,18 +378,18 @@ function updateHeader(title, type) {
         }
     }
     else if (type == "UsersManager") {
-        `
-        <img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
+        let user = API.retrieveLoggedUser();
+        $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
         <img id='UserAvatarSmall' class='UserAvatarSmall' src='${user.Avatar}'>
         <div class="dropdown ms-auto dropdownLayout">
         <div data-bs-toggle="dropdown" aria-expanded="false">
             <i class="cmdIcon fa fa-ellipsis-vertical"></i>
         </div>
         <div class="dropdown-menu noselect">
-        <span class="dropdown-item" id="manageUserCm">
-        <i class="menuIcon fas fa-user-cog mx-2"></i> 
-        Gestion des usagers 
-        </span>
+            <span class="dropdown-item" id="manageUserCm">
+                <i class="menuIcon fas fa-user-cog mx-2"></i> 
+                Gestion des usagers 
+            </span>
         <div class="dropdown-divider"></div>
             <span class="dropdown-item" id="logoutCmd">
             <i class="menuIcon fa fa-sign-out mx-2"></i>
@@ -399,38 +399,39 @@ function updateHeader(title, type) {
             <i class="menuIcon fa fa-user-edit mx-2"></i>
             Modifier votre profil
             </span> <div class="dropdown-divider">
-            </div> <span class="dropdown-item" id="listPhotosMenuCmd">
+        </div> 
+        <span class="dropdown-item" id="listPhotosMenuCmd">
             <i class="menuIcon fa fa-image mx-2"></i>
             Liste des photos 
-            </span>
-            <div class="dropdown-divider"></div> 
+        </span>
+        <div class="dropdown-divider"></div> 
             <span class="dropdown-item" id="sortByDateCmd"> 
-            <i class="menuIcon fa fa-check mx-2"></i>
-            <i class="menuIcon fa fa-calendar mx-2"></i> 
-            Photos par date de création 
+                <i class="menuIcon fa fa-check mx-2"></i>
+                <i class="menuIcon fa fa-calendar mx-2"></i> 
+                Photos par date de création 
             </span> 
             <span class="dropdown-item" id="sortByOwnersCmd"> 
-            <i class="menuIcon fa fa-fw mx-2"></i> 
-            <i class="menuIcon fa fa-users mx-2"></i> 
-            Photos par créateur 
+                <i class="menuIcon fa fa-fw mx-2"></i> 
+                <i class="menuIcon fa fa-users mx-2"></i> 
+                Photos par créateur 
             </span> 
             <span class="dropdown-item" id="sortByLikesCmd"> 
-            <i class="menuIcon fa fa-fw mx-2"></i> 
-            <i class="menuIcon fa fa-user mx-2"></i> 
-            Photos les plus aiméés 
+                <i class="menuIcon fa fa-fw mx-2"></i> 
+                <i class="menuIcon fa fa-user mx-2"></i> 
+                Photos les plus aiméés 
             </span> 
             <span class="dropdown-item" id="ownerOnlyCmd"> 
-            <i class="menuIcon fa fa-fw mx-2"></i> 
-            <i class="menuIcon fa fa-user mx-2"></i> 
-            Mes photos 
+                <i class="menuIcon fa fa-fw mx-2"></i> 
+                <i class="menuIcon fa fa-user mx-2"></i> 
+                Mes photos 
             </span> 
             <div class="dropdown-divider"></div> 
-            <span class="dropdown-item" id="aboutCmd"> 
-            <i class="menuIcon fa fa-info-circle mx-2"></i> 
-            À propos... 
-            </span> 
+                <span class="dropdown-item" id="aboutCmd"> 
+                    <i class="menuIcon fa fa-info-circle mx-2"></i> 
+                    À propos... 
+                </span> 
             </div> 
-            </div>`
+        </div>`));
     }
     $('#loginCmd').on('click', renderLogin);
     $('#aboutCmd').on('click', renderAbout);
@@ -620,14 +621,11 @@ function renderKill() {
     $('#cancelCmd').on("click", renderModify);
 }
 
-async function renderUserManager() {
+function renderKillAdmin(user) {
     eraseContent();
-    updateHeader("Gestion des usagers", "UsersManager");
-
-    let result = await API.GetAccounts();
-    let users = result.data;
-    users.forEach(user => {
-        $("#content").append($(`
+    $("#content").append($(`
+    <div class="content" style="text-align:center">
+        <h4 style="margin-top:30px">Voulez-vous vraiment effacer cet usager et toutes ses photos?</h4>
         <div class="UserLayout">
             <img id="avatarUser" class="UserAvatar"src="${user.Avatar}"/>
             <div class="UserInfo">
@@ -635,6 +633,65 @@ async function renderUserManager() {
                 <span class="UserEmail">${user.Email}</span>
             </div>
         </div>
+        <div class="form">
+            <button class="form-control btn-danger" id="deleteCmd">Effacer mon compte</button>
+        </div>
+        <div class="form">
+            <button class="form-control btn-secondary" id="cancelCmd">Annuler</button>
+        </div>
+    </div>
     `));
-    })
+    $('#deleteCmd').on("click", async function (event) {
+        event.preventDefault();
+        showWaitingGif();
+        let result = await API.unsubscribeAccount(user.Id);
+        if (result) {
+            renderUserManager();
+        }
+    });
+    $('#cancelCmd').on("click", renderUserManager);
+}
+
+async function renderUserManager() {
+    eraseContent();
+    updateHeader("Gestion des usagers", "UsersManager");
+    let currentUserId = API.retrieveLoggedUser().Id;
+    let result = await API.GetAccounts();
+    let users = result.data;
+    let cssAdmin = "";
+    let cssBlock = "";
+    users.forEach((user) => {
+        if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
+            cssAdmin = "cmdIconVisible fas fa-user-cog dodgerblueCmd";
+        } else {
+            cssAdmin = "cmdIconVisible fas fa-user-alt dodgerblueCmd"
+        }
+        if (user.Id != currentUserId) {
+            $("#content").append($(`
+            <div class="UserContainer">
+                <div class="UserLayout">
+                    <img id="avatarUser" class="UserAvatar"src="${user.Avatar}"/>
+                    <div class="UserInfo">
+                        <span class="UserName">${user.Name}</span>
+                        <span class="UserEmail">${user.Email}</span>
+                    </div>
+                </div>
+                <div class="UserCommandPanel">
+                    <button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="adminCmd"/>
+                    <button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="blockCmd"/>
+                    <button class="cmdIconVisible fas fa-user-slash goldenrodCmd" style="border-width:0px" id="removeCmd"/>
+                </div>
+            </div>
+            `));
+        }
+        $('#adminCmd').on('click', function () {
+            user.Authorizations.readAccess = 2;
+            user.Authorizations.writeAccess = 2;
+        });
+        $('#blockCmd').on('click', function () {
+            user.Authorizations.readAccess = 0;
+            user.Authorizations.writeAccess = 0;
+        });
+        $('#removeCmd').on('click', renderKillAdmin(user));
+    });
 }
