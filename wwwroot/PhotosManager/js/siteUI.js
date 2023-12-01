@@ -15,6 +15,7 @@ function Init_UI() {
 }
 
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
+    initTimeout();
     eraseContent();
     updateHeader("Connexion", "Login");
     if (EmailError == undefined) {
@@ -708,8 +709,10 @@ async function renderUserManager() {
     $('#promoteCmd').on('click', async function () {
         let userId = $(this).attr("userId");
         console.log(await API.getUserById(userId));
-        //user.Authorizations.readAccess = 2;
-        //user.Authorizations.writeAccess = 2;
+        let result = await API.getUserById(userId);
+        if (result) {
+            renderUserManager();
+        }
     });
     $('#demoteCmd').on('click', function () {
         user.Authorizations.readAccess = 1;
