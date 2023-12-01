@@ -15,7 +15,6 @@ function Init_UI() {
 }
 
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
-    initTimeout();
     eraseContent();
     updateHeader("Connexion", "Login");
     if (EmailError == undefined) {
