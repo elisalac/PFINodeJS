@@ -705,9 +705,9 @@ async function renderUserManager() {
             renderKillAdmin(user);
         });
     });
-    $('#promoteCmd').on('click', function () {
+    $('#promoteCmd').on('click', async function () {
         let userId = $(this).attr("userId");
-        console.log(API.getUserById(userId));
+        console.log(await API.getUserById(userId));
         //user.Authorizations.readAccess = 2;
         //user.Authorizations.writeAccess = 2;
     });

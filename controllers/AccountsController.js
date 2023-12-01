@@ -179,4 +179,14 @@ export default class AccountsController extends Controller {
             this.authorizations = previousAuthorization;
         }
     }
+
+    promote(id) {
+        if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
+            let user = this.repository.get(id);
+            user.Authorizations.readAccess = 2;
+            user.Authorizations.writeAccess = 2;
+        } else {
+            this.HttpContext.unAuthorized();
+        }
+    }
 }

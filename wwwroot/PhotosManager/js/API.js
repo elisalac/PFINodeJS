@@ -14,12 +14,12 @@ class API {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + "/accounts/index?id=" + id,
+                url: serverHost + "/Accounts/promote?id=" + id,
                 contentType: 'application/json',
                 type: 'GET',
                 data: {},
-                success: (profil) => {
-                    resolve(profil);
+                success: () => {
+                    resolve(true);
                 },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });
