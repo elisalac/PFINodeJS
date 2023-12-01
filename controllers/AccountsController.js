@@ -55,6 +55,8 @@ export default class AccountsController extends Controller {
     }
 
     sendVerificationEmail(user) {
+        // bypass model bindeExtraData wich hide the user verifyCode
+        user = this.repository.findByField("Id", user.Id);
         let html = `
                 Bonjour ${user.Name}, <br /> <br />
                 Voici votre code pour confirmer votre adresse de courriel
@@ -169,16 +171,12 @@ export default class AccountsController extends Controller {
     }
     // GET:account/remove/id
     remove(id) { // warning! this is not an API endpoint
-        if (Authorizations.writeGranted(this.HttpContext, Authorizations.user()))
-            if (this.repository != null) {
-                if (this.HttpContext.path.id) {
-                    if (this.repository.remove(id))
-                        this.HttpContext.response.accepted();
-                    else
-                        this.HttpContext.response.notFound("Ressource not found.");
-                } else
-                    this.HttpContext.response.badRequest("The Id in the request url is rather not specified or syntactically wrong.");
-            } else
-                this.HttpContext.response.notImplemented();
+        if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
+            this.tokensRepository.keepByFilter(token => token.User.Id != id);
+            let previousAuthorization = this.authorizations;
+            this.authorizations = Authorizations.user();
+            super.remove(id);
+            this.authorizations = previousAuthorization;
+        }
     }
 }

@@ -174,4 +174,18 @@ export default class Repository {
         }
         return -1;
     }
+    keepByFilter(filterFunc) {
+        let objectsList = this.objects();
+        if (objectsList) {
+            this.objectsList = objectsList.filter(filterFunc);
+            this.write();
+        }
+    }
+    findByFilter(filterFunc) {
+        let objectsList = this.objects();
+        if (objectsList) {
+            return objectsList.filter(filterFunc);
+        }
+        return null;
+    }
 }

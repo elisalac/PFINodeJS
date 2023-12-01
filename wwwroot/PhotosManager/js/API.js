@@ -139,7 +139,6 @@ class API {
                 data: {},
                 headers: API.getBearerAuthorizationToken(),
                 success: () => {
-                    API.logout();
                     resolve(true);
                 },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
