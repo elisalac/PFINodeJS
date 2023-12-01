@@ -14,7 +14,7 @@ class API {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + "/Accounts/promote?id=" + id,
+                url: serverHost + "/accounts/promote?id=" + id,
                 contentType: 'application/json',
                 type: 'GET',
                 data: {},
