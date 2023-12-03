@@ -21,6 +21,7 @@ class API {
                 success: () => {
                     resolve(true);
                 },
+                //success: data => { resolve(data); },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });
         });

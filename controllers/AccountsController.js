@@ -5,6 +5,7 @@ import * as utilities from "../utilities.js";
 import Gmail from "../gmail.js";
 import Controller from './Controller.js';
 import Authorizations from '../authorizations.js';
+import RouteRegister from '../routeRegister.js';
 
 export default class AccountsController extends Controller {
     constructor(HttpContext) {
@@ -181,6 +182,7 @@ export default class AccountsController extends Controller {
     }
 
     promote(id) {
+        console.log(RouteRegister.find(this.HttpContext).payload);
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
             let user = this.repository.get(id);
             user.Authorizations.readAccess = 2;

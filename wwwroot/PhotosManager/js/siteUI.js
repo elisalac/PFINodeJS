@@ -707,7 +707,7 @@ async function renderUserManager() {
     });
     $('#promoteCmd').on('click', async function () {
         let userId = $(this).attr("userId");
-        console.log(await API.getUserById(userId));
+        //console.log(await API.getUserById(userId));
         let result = await API.getUserById(userId);
         if (result) {
             renderUserManager();
