@@ -180,20 +180,14 @@ export default class AccountsController extends Controller {
         }
     }
 
-    promote() {
-        let id = this.HttpContext.path.params.id;
+    promote(id) {
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.admin())) {
-            //let user = this.repository.get(this.HttpContext.payload.id);
-            let user = this.repository.get(id);
-            user.Authorizations.readAccess = 2;
-            user.Authorizations.writeAccess = 2;
-            //this.repository.update(this.HttpContext.payload.id, user);
-            //this.repository.update(this.HttpContext.payload.id, user);
+            let user = this.repository.findByField("Id",id);
+            user.Authorizations = Authorizations.admin();
             let updatedUser = this.repository.update(id, user);
             if (this.repository.model.state.isValid) {
                 this.HttpContext.response.updated(updatedUser);
             }
-            this.HttpContext.response.accepted();
         } else {
             this.HttpContext.response.unAuthorized("Unauthorized access");
         }
@@ -201,13 +195,27 @@ export default class AccountsController extends Controller {
 
     demote(id) {
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.admin())) {
-            let user = this.repository.get(this.HttpContext.payload.id);
-            user.Authorizations.readAccess = 1;
-            user.Authorizations.writeAccess = 1;
-            this.repository.update(this.HttpContext.payload.id, user);
-            this.HttpContext.response.accepted();
+            let user = this.repository.findByField("Id",id);
+            user.Authorizations = Authorizations.user();
+            let updatedUser = this.repository.update(id, user);
+            if (this.repository.model.state.isValid) {
+                this.HttpContext.response.updated(updatedUser);
+            }
         } else {
             this.HttpContext.response.unAuthorized("Unauthorized access");
         }
+    }
+    block(id){
+        if (Authorizations.writeGranted(this.HttpContext, Authorizations.admin())) {
+            let user = this.repository.findByField("Id",id);
+            user.Authorizations = Authorizations.anonymous();
+            let updatedUser = this.repository.update(id, user);
+            if (this.repository.model.state.isValid) {
+                this.HttpContext.response.updated(updatedUser);
+            }
+        } else {
+            this.HttpContext.response.unAuthorized("Unauthorized access");
+        }
+
     }
 }

@@ -5,6 +5,7 @@
 
 
 
+
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -58,13 +59,20 @@ function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessa
         let result = await API.login(loginInfo.Email, loginInfo.Password)
         if (result) {
             let code = await API.retrieveLoggedUser();
-            console.log(code.VerifyCode)
-            if (code.VerifyCode != "verified") {
-                renderVerifyForm();
+            if(code.Authorizations.writeAccess == 0 && code.Authorizations.readAccess == 0)
+            {
+                API.logout()
+                renderLogin("","Votre compte est bloqué")
             }
-            else {
-                renderImages();
+            else{
+                if (code.VerifyCode != "verified") {
+                    renderVerifyForm();
+                }
+                else {
+                    renderImages();
+                }
             }
+            
         }
         else {
             switch (API.currentStatus) {
@@ -669,14 +677,14 @@ async function renderUserManager() {
             let buttonBlock = "";
             users.forEach((user) => {
                 if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
-                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd" userId="' + user.Id + '"/>';
+                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd demoteCmd" style="border-width:0px" id="demoteCmd" userId="' + user.Id + '"/>';
                 } else {
-                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd" userId="' + user.Id + '"/>';
+                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd promoteCmd" style="border-width:0px" id="promoteCmd" userId="' + user.Id + '"/>';
                 }
                 if (user.Authorizations.readAccess == 0 && user.Authorizations.writeAccess == 0) {
-                    buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd" style="border-width:0px" id="blockCmd"/>'
+                    buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd unblockCmd" style="border-width:0px" userId="' + user.Id + '"/>'
                 } else {
-                    buttonBlock = '<button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="unblockCmd"/>';
+                    buttonBlock = '<button class="cmdIconVisible fa-regular fa-circle greenCmd blockCmd" style="border-width:0px" userId="' + user.Id + '"/>';
                 }
                 if (user.Id != currentUserId) {
                     $("#content").append($(`
@@ -691,7 +699,7 @@ async function renderUserManager() {
                         <div class="UserCommandPanel">
                             ${buttonAdmin}
                             ${buttonBlock}
-                            <button class="cmdIconVisible fas fa-user-slash goldenrodCmd" style="border-width:0px" id="removeCmd"/>
+                            <button class="cmdIconVisible fas fa-user-slash goldenrodCmd removeCmd" style="border-width:0px" id="removeCmd" userid="${user.Id}"/>
                         </div>
                     </div>
                     `));
@@ -701,29 +709,53 @@ async function renderUserManager() {
         }
     }
 
-    $('#promoteCmd').on('click', async function () {
+    $('.promoteCmd').on('click', async function () {
         let userId = $(this).attr("userId");
         let result = await API.getUserByIdPromote(userId);
         if (result) {
             renderUserManager();
         }
+        else{
+            console.log("penis")
+        }
     });
-    $('#demoteCmd').on('click', async function () {
-        let userId = $(this).attr($("user").val());
+    $('.demoteCmd').on('click', async function () {
+        let userId = $(this).attr("userId");
         let result = await API.getUserByIdDemote(userId);
         if (result) {
             renderUserManager();
         }
+        else{
+            console.log("penis")
+        }
     });
-    $('#blockCmd').on('click', function () {
-        user.Authorizations.readAccess = 0;
-        user.Authorizations.writeAccess = 0;
+    $('.blockCmd').on('click', async function () {
+        let userId = $(this).attr("userId");
+        let result = await API.BlockUser(userId);
+        if (result) {
+            renderUserManager();
+        }
+        else{
+            console.log("penis")
+        }
     });
-    $('#unblockCmd').on('click', function () {
-        user.Authorizations.readAccess = 1;
-        user.Authorizations.writeAccess = 1;
+    $('.unblockCmd').on('click', async function () {
+        let userId = $(this).attr("userId");
+        let result = await API.getUserByIdDemote(userId);
+        if (result) {
+            renderUserManager();
+        }
+        else{
+            console.log("penis")
+        }
     });
-    $('#removeCmd').on('click', function () {
-        renderKillAdmin(user);
+    $('.removeCmd').on('click', async function () {
+        let userId = $(this).attr("userId");
+        let result = await API.GetUser(userId);
+        if(result)
+        {
+            renderKillAdmin(result);
+        }
+        
     });
 }

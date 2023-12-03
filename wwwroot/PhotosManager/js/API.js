@@ -14,7 +14,7 @@ class API {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + "/accounts/promote?id=" + id,
+                url: serverHost + "/accounts/promote/" + id,
                 contentType: 'text/plain',
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
@@ -26,12 +26,24 @@ class API {
             });
         });
     }
-
+    static GetUser(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/index/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                success: profil => { resolve(profil); },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
     static getUserByIdDemote(id) {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + "/accounts/demote?id=" + id,
+                url: serverHost + "/accounts/demote/" + id,
                 contentType: 'text/plain',
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
@@ -43,7 +55,22 @@ class API {
             });
         });
     }
-
+    static BlockUser(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/block/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                data: {},
+                success: () => {
+                    resolve(true);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
     static setHttpErrorState(xhr) {
         if (xhr.responseJSON)
             this.currentHttpError = xhr.responseJSON.error_description;
