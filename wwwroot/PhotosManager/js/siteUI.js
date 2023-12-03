@@ -657,64 +657,73 @@ function renderKillAdmin(user) {
 async function renderUserManager() {
     eraseContent();
     updateHeader("Gestion des usagers", "UsersManager");
-    let currentUserId = API.retrieveLoggedUser().Id;
-    let result = await API.GetAccounts();
-    let users = result.data;
-    let buttonAdmin = "";
-    let buttonBlock = "";
-    users.forEach((user) => {
-        if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
-            buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd" userId="' + user.Id + '"/>';
-        } else {
-            buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd" userId="' + user.Id + '"/>';
-        }
-        if (user.Authorizations.readAccess == 0 && user.Authorizations.writeAccess == 0) {
-            buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd" style="border-width:0px" id="blockCmd"/>'
-        } else {
-            buttonBlock = '<button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="unblockCmd"/>';
-        }
-        if (user.Id != currentUserId) {
-            $("#content").append($(`
-            <div class="UserContainer">
-                <div class="UserLayout">
-                    <img id="avatarUser" class="UserAvatar"src="${user.Avatar}"/>
-                    <div class="UserInfo">
-                        <span class="UserName">${user.Name}</span>
-                        <span class="UserEmail">${user.Email}</span>
+    let currentUserId = "";
+    let users = "";
+    let result1 = await API.GetAccounts();
+    if (result1) {
+        users = result1.data;
+        let result2 = await API.retrieveLoggedUser();
+        if (result2) {
+            currentUserId = result2.Id;
+            let buttonAdmin = "";
+            let buttonBlock = "";
+            users.forEach((user) => {
+                if (user.Authorizations.readAccess == 2 && user.Authorizations.writeAccess == 2) {
+                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-cog dodgerblueCmd" style="border-width:0px" id="demoteCmd" userId="' + user.Id + '"/>';
+                } else {
+                    buttonAdmin = '<button class="cmdIconVisible fas fa-user-alt dodgerblueCmd" style="border-width:0px" id="promoteCmd" userId="' + user.Id + '"/>';
+                }
+                if (user.Authorizations.readAccess == 0 && user.Authorizations.writeAccess == 0) {
+                    buttonBlock = '<button class="cmdIconVisible fa fa-ban redCmd" style="border-width:0px" id="blockCmd"/>'
+                } else {
+                    buttonBlock = '<button class="cmdIconVisible fa-regular fa-circle greenCmd" style="border-width:0px" id="unblockCmd"/>';
+                }
+                if (user.Id != currentUserId) {
+                    $("#content").append($(`
+                    <div class="UserContainer">
+                        <div class="UserLayout">
+                            <img id="avatarUser" class="UserAvatar"src="${user.Avatar}"/>
+                            <div class="UserInfo">
+                                <span class="UserName">${user.Name}</span>
+                                <span class="UserEmail">${user.Email}</span>
+                            </div>
+                        </div>
+                        <div class="UserCommandPanel">
+                            ${buttonAdmin}
+                            ${buttonBlock}
+                            <button class="cmdIconVisible fas fa-user-slash goldenrodCmd" style="border-width:0px" id="removeCmd"/>
+                        </div>
                     </div>
-                </div>
-                <div class="UserCommandPanel">
-                    ${buttonAdmin}
-                    ${buttonBlock}
-                    <button class="cmdIconVisible fas fa-user-slash goldenrodCmd" style="border-width:0px" id="removeCmd"/>
-                </div>
-            </div>
-            `));
+                    `));
+                }
+
+            });
         }
+    }
 
-
-        $('#blockCmd').on('click', function () {
-            user.Authorizations.readAccess = 0;
-            user.Authorizations.writeAccess = 0;
-        });
-        $('#unblockCmd').on('click', function () {
-            user.Authorizations.readAccess = 1;
-            user.Authorizations.writeAccess = 1;
-        });
-        $('#removeCmd').on('click', function () {
-            renderKillAdmin(user);
-        });
-    });
     $('#promoteCmd').on('click', async function () {
         let userId = $(this).attr("userId");
-        //console.log(await API.getUserById(userId));
-        let result = await API.getUserById(userId);
+        let result = await API.getUserByIdPromote(userId);
         if (result) {
             renderUserManager();
         }
     });
-    $('#demoteCmd').on('click', function () {
+    $('#demoteCmd').on('click', async function () {
+        let userId = $(this).attr($("user").val());
+        let result = await API.getUserByIdDemote(userId);
+        if (result) {
+            renderUserManager();
+        }
+    });
+    $('#blockCmd').on('click', function () {
+        user.Authorizations.readAccess = 0;
+        user.Authorizations.writeAccess = 0;
+    });
+    $('#unblockCmd').on('click', function () {
         user.Authorizations.readAccess = 1;
         user.Authorizations.writeAccess = 1;
+    });
+    $('#removeCmd').on('click', function () {
+        renderKillAdmin(user);
     });
 }

@@ -5,7 +5,6 @@ import * as utilities from "../utilities.js";
 import Gmail from "../gmail.js";
 import Controller from './Controller.js';
 import Authorizations from '../authorizations.js';
-import RouteRegister from '../routeRegister.js';
 
 export default class AccountsController extends Controller {
     constructor(HttpContext) {
@@ -181,15 +180,34 @@ export default class AccountsController extends Controller {
         }
     }
 
-    promote(id) {
-        console.log(RouteRegister.find(this.HttpContext).payload);
-        if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
+    promote() {
+        let id = this.HttpContext.path.params.id;
+        if (Authorizations.writeGranted(this.HttpContext, Authorizations.admin())) {
+            //let user = this.repository.get(this.HttpContext.payload.id);
             let user = this.repository.get(id);
             user.Authorizations.readAccess = 2;
             user.Authorizations.writeAccess = 2;
+            //this.repository.update(this.HttpContext.payload.id, user);
+            //this.repository.update(this.HttpContext.payload.id, user);
+            let updatedUser = this.repository.update(id, user);
+            if (this.repository.model.state.isValid) {
+                this.HttpContext.response.updated(updatedUser);
+            }
             this.HttpContext.response.accepted();
         } else {
-            this.HttpContext.unAuthorized();
+            this.HttpContext.response.unAuthorized("Unauthorized access");
+        }
+    }
+
+    demote(id) {
+        if (Authorizations.writeGranted(this.HttpContext, Authorizations.admin())) {
+            let user = this.repository.get(this.HttpContext.payload.id);
+            user.Authorizations.readAccess = 1;
+            user.Authorizations.writeAccess = 1;
+            this.repository.update(this.HttpContext.payload.id, user);
+            this.HttpContext.response.accepted();
+        } else {
+            this.HttpContext.response.unAuthorized("Unauthorized access");
         }
     }
 }

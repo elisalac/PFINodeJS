@@ -10,22 +10,40 @@ class API {
         this.error = false;
     }
 
-    static getUserById(id) {
+    static getUserByIdPromote(id) {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + "/accounts/promote?id=" + id,
-                contentType: 'application/json',
+                contentType: 'text/plain',
                 type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
                 data: {},
                 success: () => {
                     resolve(true);
                 },
-                //success: data => { resolve(data); },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });
         });
     }
+
+    static getUserByIdDemote(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/demote?id=" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                data: {},
+                success: () => {
+                    resolve(true);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+
     static setHttpErrorState(xhr) {
         if (xhr.responseJSON)
             this.currentHttpError = xhr.responseJSON.error_description;
