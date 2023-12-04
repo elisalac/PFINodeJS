@@ -3,9 +3,6 @@
 // import User from "../models/user";
 // import { makeVerifyCode } from "../utilities";
 
-
-
-
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
@@ -17,6 +14,7 @@ function Init_UI() {
 
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
     eraseContent();
+    noTimeout();
     updateHeader("Connexion", "Login");
     if (EmailError == undefined) {
         EmailError = "";
@@ -59,12 +57,11 @@ function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessa
         let result = await API.login(loginInfo.Email, loginInfo.Password)
         if (result) {
             let code = await API.retrieveLoggedUser();
-            if(code.Authorizations.writeAccess == 0 && code.Authorizations.readAccess == 0)
-            {
+            if (code.Authorizations.writeAccess == 0 && code.Authorizations.readAccess == 0) {
                 API.logout()
-                renderLogin("","Votre compte est bloqué")
+                renderLogin("", "Votre compte est bloqué")
             }
-            else{
+            else {
                 if (code.VerifyCode != "verified") {
                     renderVerifyForm();
                 }
@@ -72,7 +69,7 @@ function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessa
                     renderImages();
                 }
             }
-            
+
         }
         else {
             switch (API.currentStatus) {
@@ -107,6 +104,7 @@ function renderServerError() {
 
 function renderVerifyForm() {
     eraseContent(); // effacer le conteneur #content
+    timeout();
     updateHeader("Vérification", "verif");
     $("#content").append($(`
     <div class="content" style="text-align:center">
@@ -511,6 +509,7 @@ function renderAbout() {
 
 function renderModify() {
     let user = API.retrieveLoggedUser();
+    timeout();
     eraseContent();
     $("#content").append($(`
     <form class="form" id="editProfilForm"'>
@@ -604,6 +603,7 @@ function renderModify() {
 }
 
 function renderKill() {
+    timeout();
     eraseContent();
     $("#content").append($(`
     <div class="content" style="text-align:center">
@@ -664,6 +664,7 @@ function renderKillAdmin(user) {
 
 async function renderUserManager() {
     eraseContent();
+    timeout();
     updateHeader("Gestion des usagers", "UsersManager");
     let currentUserId = "";
     let users = "";
@@ -715,8 +716,8 @@ async function renderUserManager() {
         if (result) {
             renderUserManager();
         }
-        else{
-            console.log("penis")
+        else {
+
         }
     });
     $('.demoteCmd').on('click', async function () {
@@ -725,8 +726,8 @@ async function renderUserManager() {
         if (result) {
             renderUserManager();
         }
-        else{
-            console.log("penis")
+        else {
+
         }
     });
     $('.blockCmd').on('click', async function () {
@@ -735,8 +736,8 @@ async function renderUserManager() {
         if (result) {
             renderUserManager();
         }
-        else{
-            console.log("penis")
+        else {
+
         }
     });
     $('.unblockCmd').on('click', async function () {
@@ -745,17 +746,21 @@ async function renderUserManager() {
         if (result) {
             renderUserManager();
         }
-        else{
-            console.log("penis")
+        else {
+
         }
     });
     $('.removeCmd').on('click', async function () {
         let userId = $(this).attr("userId");
         let result = await API.GetUser(userId);
-        if(result)
-        {
+        if (result) {
             renderKillAdmin(result);
         }
-        
+
     });
+}
+
+
+function renderError(message) {
+
 }
