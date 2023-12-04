@@ -10,9 +10,11 @@ Init_UI();
 
 function Init_UI() {
     renderLogin();
+    initTimeout(200, renderLogin);
 }
 
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
+    API.logout();
     eraseContent();
     noTimeout();
     updateHeader("Connexion", "Login");
@@ -80,7 +82,6 @@ function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessa
                 default:
                     {
                         renderServerError();
-                        //faire fonction pour gérer pas de connexion avec serveur(fonction render comme dans énoncé)
                     }
             }
         }
@@ -131,7 +132,8 @@ function renderVerifyForm() {
         }
         else {
             API.logout();
-            renderLogin();//erreur c'est produite
+            renderLogin("", "", "", "Une erreur c'est produit.");
+
         }
     });
 }
@@ -467,7 +469,7 @@ async function createProfil(profil) {
         renderLogin("", "", "", "Votre compte a été créé. Veuillez prendre vos courriels pour réccupérer votre code de vérification qui vous sera demandé lors de votre prochaine connexion.");
     }
     else {
-        //king
+        renderError("Une erreur c'est produite.");
     }
 
 }
@@ -595,6 +597,9 @@ function renderModify() {
         if (result) {
             renderImages();
         }
+        else {
+            renderError("Une erreur c'est produite.");
+        }
     });
     $('#abortCmd').on('click', renderImages);
     $('#killCmd').on("click", renderKill);
@@ -624,6 +629,8 @@ function renderKill() {
         if (result) {
             renderlogout();
             renderLogin();
+        } else {
+            renderError("Une erreur c'est produite.");
         }
     });
     $('#cancelCmd').on("click", renderModify);
@@ -657,6 +664,8 @@ function renderKillAdmin(user) {
         let result = await API.unsubscribeAccount(user.Id);
         if (result) {
             renderUserManager();
+        } else {
+            renderError("Une erreur c'est produite.");
         }
     });
     $('#cancelCmd').on("click", renderUserManager);
@@ -717,7 +726,7 @@ async function renderUserManager() {
             renderUserManager();
         }
         else {
-
+            renderError("Une erreur c'est produite.");
         }
     });
     $('.demoteCmd').on('click', async function () {
@@ -727,7 +736,7 @@ async function renderUserManager() {
             renderUserManager();
         }
         else {
-
+            renderError("Une erreur c'est produite.")
         }
     });
     $('.blockCmd').on('click', async function () {
@@ -737,7 +746,7 @@ async function renderUserManager() {
             renderUserManager();
         }
         else {
-
+            renderError("Une erreur c'est produite.");
         }
     });
     $('.unblockCmd').on('click', async function () {
@@ -747,7 +756,7 @@ async function renderUserManager() {
             renderUserManager();
         }
         else {
-
+            renderError("Une erreur c'est produite.");
         }
     });
     $('.removeCmd').on('click', async function () {
@@ -756,11 +765,26 @@ async function renderUserManager() {
         if (result) {
             renderKillAdmin(result);
         }
-
+        else {
+            renderError("Une erreur c'est produite.");
+        }
     });
 }
 
 
 function renderError(message) {
+    $('body').append(`
+        <div class='popupError'> 
+            <div class='popupContentError'>
+                <div>
+                    <div class='popupHeaderError errorMessage'>${message}</div>
+                </div>
+                <div onclick='closePopupError(); ' class='close-btn fa fa-close'></div> 
+            </div>
+        </div> 
+    `);
+}
 
+function closePopupError() {
+    $(".popupError").hide();
 }
