@@ -24,31 +24,5 @@
             "readAccess": 2,
             "writeAccess": 2
         }
-    },
-    {
-        "Id": "84d7f970-8d2f-11ee-9b87-4d123c379544",
-        "Email": "elisa.lacombe04@gmail.com",
-        "Password": "************",
-        "Name": "El",
-        "Avatar": "84d82080-8d2f-11ee-9b87-4d123c379544.jpeg",
-        "Created": 1701094573,
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        }
-    },
-    {
-        "Id": "f5510110-8d2f-11ee-9b87-4d123c379544",
-        "Email": "jebof67610@mainoj.com",
-        "Password": "************",
-        "Name": "Test",
-        "Avatar": "f5510111-8d2f-11ee-9b87-4d123c379544.png",
-        "Created": 1701094761,
-        "VerifyCode": "unverified",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        }
     }
 ]
