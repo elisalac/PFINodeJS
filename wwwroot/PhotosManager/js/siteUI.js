@@ -9,7 +9,9 @@ function Init_UI() {
 }
 
 function renderLogin(Email = "", EmailError = "", passwordError = "", loginMessage = "") {
-    API.logout();
+    if (API.retrieveLoggedUser() != undefined) {
+        API.logout();
+    }
     eraseContent();
     noTimeout();
     updateHeader("Connexion", "Login");
