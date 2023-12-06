@@ -129,7 +129,7 @@ function renderVerifyForm() {
         }
         else {
             API.logout();
-            renderLogin("", "", "", "Une erreur c'est produit.");
+            renderLogin("", "", "", "Une erreur s'est produite.");
 
         }
     });
