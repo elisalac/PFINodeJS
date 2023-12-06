@@ -1,8 +1,3 @@
-//import { getLogger } from "nodemailer/lib/shared";
-// import HttpContext from "../httpContext";
-// import User from "../models/user";
-// import { makeVerifyCode } from "../utilities";
-
 let contentScrollPosition = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Views rendering
