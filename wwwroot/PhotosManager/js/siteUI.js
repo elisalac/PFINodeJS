@@ -309,7 +309,7 @@ function updateHeader(title, type) {
             </span> 
             <span class="dropdown-item" id="sortByLikesCmd"> 
             <i class="menuIcon fa fa-fw mx-2"></i> 
-            <i class="menuIcon fa fa-user mx-2"></i> 
+            <i class="menuIcon fa fa-heart mx-2"></i> 
             Photos les plus aiméés 
             </span> 
             <span class="dropdown-item" id="ownerOnlyCmd"> 
@@ -425,7 +425,7 @@ function updateHeader(title, type) {
             </span> 
             <span class="dropdown-item" id="sortByLikesCmd"> 
                 <i class="menuIcon fa fa-fw mx-2"></i> 
-                <i class="menuIcon fa fa-user mx-2"></i> 
+                <i class="menuIcon fa fa-heart mx-2"></i> 
                 Photos les plus aiméés 
             </span> 
             <span class="dropdown-item" id="ownerOnlyCmd"> 
