@@ -367,7 +367,38 @@ function updateHeader(title, type) {
             <span class="dropdown-item" id="editProfilMenuCmd">
             <i class="menuIcon fa fa-user-edit mx-2"></i>
             Modifier votre profil 
-            </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="listPhotosMenuCmd"> <i class="menuIcon fa fa-image mx-2"></i> Liste des photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="sortByDateCmd"> <i class="menuIcon fa fa-check mx-2"></i> <i class="menuIcon fa fa-calendar mx-2"></i> Photos par date de création </span> <span class="dropdown-item" id="sortByOwnersCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-users mx-2"></i> Photos par créateur </span> <span class="dropdown-item" id="sortByLikesCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Photos les plus aiméés </span> <span class="dropdown-item" id="ownerOnlyCmd"> <i class="menuIcon fa fa-fw mx-2"></i> <i class="menuIcon fa fa-user mx-2"></i> Mes photos </span> <div class="dropdown-divider"></div> <span class="dropdown-item" id="aboutCmd"> <i class="menuIcon fa fa-info-circle mx-2"></i> À propos... </span> </div> </div>`));
+            </span> 
+            <div class="dropdown-divider"></div>
+            <span class="dropdown-item" id="listPhotosMenuCmd"> 
+            <i class="menuIcon fa fa-image mx-2"></i>
+            Liste des photos 
+            </span> 
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="sortByDateCmd"> 
+            <i class="menuIcon fa fa-check mx-2"></i> 
+            <i class="menuIcon fa fa-calendar mx-2"></i> 
+            Photos par date de création 
+            </span> 
+            <span class="dropdown-item" id="sortByOwnersCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-users mx-2"></i> 
+            Photos par créateur 
+            </span> 
+            <span class="dropdown-item" id="sortByLikesCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Photos les plus aiméés 
+            </span> 
+            <span class="dropdown-item" id="ownerOnlyCmd"> 
+            <i class="menuIcon fa fa-fw mx-2"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Mes photos 
+            </span> 
+            <div class="dropdown-divider"></div> 
+            <span class="dropdown-item" id="aboutCmd"> 
+            <i class="menuIcon fa fa-info-circle mx-2"></i> 
+            À propos... 
+            </span> </div> </div>`));
             }
             else {
                 $("#header").append($(`<img id='photoTitleContainer' src='./favicon.ico'/><h2>${title}</h2>
