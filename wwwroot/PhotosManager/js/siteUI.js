@@ -494,6 +494,7 @@ function updateHeader(title, type) {
     $('#aboutCmd').on('click', renderAbout);
     $('#logoutCmd').on('click', renderlogout);
     $('#editProfilMenuCmd').on('click', renderModify);
+    $('#listPhotosMenuCmd').on('click', renderImages);
     $('#manageUserCm').on('click', renderUserManager);
     $('.photosCmd').on('click', renderImages);
     $('.modifCmd').on('click', renderModify);
