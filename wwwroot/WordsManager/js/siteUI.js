@@ -106,12 +106,11 @@ async function renderWords(refresh = false) {
                     $("#wordsList").append(renderWord(word));
                 });
                 $("#wordsList").append($("<hr>"));
+                $("#content").off();
                 $("#content").on("scroll", function () {
                     console.log($("#content").scrollTop())
                     if ($("#content").scrollTop() + $("#content").innerHeight() > ($("#wordsList").height() - rowHeight)) {
-                        $("#content").off();
                         offset++;
-                        console.log(offset);
                         renderWords();
                     }
                 });
