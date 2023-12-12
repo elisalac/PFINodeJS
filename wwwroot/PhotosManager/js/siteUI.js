@@ -760,50 +760,67 @@ function getFormData($form) {
 
 function renderAddImage() {
     timeout();
-    eraseContent();
-    UpdateHeader("Ajout de photos", "addImage");
-    $("#content").append(`
-        <br/>
-        <form class="form" id="addImageForm"'>
-            <fieldset>
-                <legend>Informations</legend>
-                <input  class="form-control" 
-                                type="text" 
-                                matchedInputId="ImageTitle"
-                                name="ImageTitle" 
-                                id="ImageTitle" 
-                                placeholder="Titre" 
-                                required
-                                RequireMessage = 'Veuillez entrez un titre à votre image'
-                                InvalidMessage="Le titre que vous avez écrit est invalide">
-                <textarea class="form-control"
-                                matchedInputId="ImageDesc"
-                                name="ImageDesc"
-                                id="ImageDesc"
-                                placeholder="Description"></textarea>
-                <input class="form-check-input"
-                        type="checkbox"
-                        matchedInputId="ImageShared"
-                        name="ImageShared" 
-                        id="ImageShared">
-                        <label style="margin-top:15px" for="ImageShared">Partagée</label>
-            </fieldset>
-            <fieldset>
-                <legend>Image</legend>
-                <div class='imageUploader' 
-                    newImage='true' 
-                    controlId='Image' 
-                    imageSrc='images/PhotoCloudLogo.png' 
-                    waitingImage="images/Loading_icon.gif">
-                </div>
-            </fieldset>
-            <input type='submit' name='submit' id='saveImage' value="Enregistrer" class="form-control btn-primary">
-        </form>
-        <div class="cancel">
-            <button class="form-control btn-secondary" id="cancelAddImageCmd">Annuler</button>
-        </div>
-    `);
+    let loggedUser = API.retrieveLoggedUser();
+    let date = nowInSeconds();
+    if (loggedUser) {
+        eraseContent();
+        UpdateHeader("Ajout de photos", "addImage");
+        $("#content").append(`
+            <br/>
+            <form class="form" id="addImageForm"'>
+                <fieldset>
+                    <legend>Informations</legend>
+                    <input type="hidden" name="OwnerId" id="Id" value="${loggedUser.Id}"/>
+                    <input type="hidden" name="Date" id="Date" value="${date}"/>
+                    <input  class="form-control" 
+                                    type="text" 
+                                    matchedInputId="ImageTitle"
+                                    name="Title" 
+                                    id="ImageTitle" 
+                                    placeholder="Titre" 
+                                    required
+                                    RequireMessage = 'Veuillez entrez un titre à votre image'
+                                    InvalidMessage="Le titre que vous avez écrit est invalide">
+                    <textarea class="form-control"
+                                    matchedInputId="ImageDesc"
+                                    name="Description"
+                                    id="ImageDesc"
+                                    placeholder="Description"></textarea>
+                    <input class="form-check-input"
+                            type="checkbox"
+                            matchedInputId="ImageShared"
+                            name="Shared" 
+                            id="ImageShared">
+                            <label style="margin-top:15px" for="ImageShared">Partagée</label>
+                </fieldset>
+                <fieldset>
+                    <legend>Image</legend>
+                    <div class='imageUploader' 
+                        newImage='true' 
+                        controlId='Image' 
+                        imageSrc='images/PhotoCloudLogo.png' 
+                        waitingImage="images/Loading_icon.gif">
+                    </div>
+                </fieldset>
+                <input type='submit' name='submit' id='saveImage' value="Enregistrer" class="form-control btn-primary">
+            </form>
+            <div class="cancel">
+                <button class="form-control btn-secondary" id="cancelAddImageCmd">Annuler</button>
+            </div>
+        `);
+        initFormValidation();
+        initImageUploaders();
+        $('#cancelAddImageCmd').on('click', renderPhotos);
+        $('#addImageForm').on('submit', async function (event) {
+            let data = getFormData($('#addImageForm'));
+            event.preventDefault();
 
-    initFormValidation();
-    initImageUploaders();
+            let result = await API.CreatePhoto(data);
+            if (result) {
+                renderPhotos();
+            } else {
+                renderError("Un problème est survenu.");
+            }
+        });
+    }
 }
