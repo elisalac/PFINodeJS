@@ -71,6 +71,7 @@ function attachCmd() {
     $('#renderManageUsersMenuCmd').on('click', renderManageUsers);
     $('#editProfilCmd').on('click', renderEditProfilForm);
     $('#aboutCmd').on("click", renderAbout);
+    $('#newPhotoCmd').on("click", renderAddImage);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Header management
@@ -331,7 +332,7 @@ function renderAbout() {
                     d'interface utilisateur monopage réactive.
                 </p>
                 <p>
-                    Auteur: vos noms d'équipiers
+                    Auteur: William Sauvé et Elisa Lacombe
                 </p>
                 <p>
                     Collège Lionel-Groulx, automne 2023
@@ -757,3 +758,44 @@ function getFormData($form) {
     return jsonObject;
 }
 
+function renderAddImage() {
+    timeout();
+    eraseContent();
+    UpdateHeader("Ajout de photos", "addImage");
+    $("#content").append(`
+        <br/>
+        <form class="form" id="addImageForm"'>
+            <fieldset>
+                <legend>Informations</legend>
+                <input  class="form-control" 
+                                type="text" 
+                                matchedInputId="ImageTitle"
+                                name="ImageTitle" 
+                                id="ImageTitle" 
+                                placeholder="Titre" 
+                                required
+                                RequireMessage = 'Veuillez entrez un titre à votre image'
+                                InvalidMessage="Le titre que vous avez écrit est invalide">
+                <input class="form-control"
+                                type="text"
+                                matchedInputId="ImageDesc"
+                                name="ImageDesc"
+                                id="ImageDesc"
+                                placeholder="Description"
+                                InvalidMessage="La description que vous avez écrit est invalide">
+            </fieldset>
+            <fieldset>
+                <legend>Image</legend>
+                <div class='imageUploader' 
+                    newImage='true' 
+                    controlId='Image' 
+                    imageSrc='images/PhotoCloudLogo.png' 
+                    waitingImage="images/Loading_icon.gif">
+                </div>
+            </fieldset>
+        </form>
+    `);
+
+    initFormValidation();
+    initImageUploaders();
+}
