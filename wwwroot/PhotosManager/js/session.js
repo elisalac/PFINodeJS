@@ -15,7 +15,7 @@ function createTimeoutPopup() {
 let currentTimeouID = undefined;
 let initialized = false;
 let timeBeforeRedirect = 5;
-let timeoutCallBack = () => {};
+let timeoutCallBack = () => { };
 let infinite = -1;
 let timeLeft = infinite;
 let maxStallingTime = infinite;

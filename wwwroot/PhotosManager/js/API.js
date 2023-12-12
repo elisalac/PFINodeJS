@@ -1,16 +1,75 @@
-
-
-
 ////////////////////////////////////////////// API photos_APIs call ///////////////////////////////////////////////////////
 
-const serverHost = "http://localhost:5000";
+const serverHost = "https://almond-cedar-track.glitch.me/";
 const photos_API = "/api/photos";
-const photoLikes_API = "/api/photolikes";
+
 class API {
     static initHttpState() {
         this.currentHttpError = "";
         this.currentStatus = 0;
         this.error = false;
+    }
+
+    static getUserByIdPromote(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/promote/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                data: {},
+                success: () => {
+                    resolve(true);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+    static GetUser(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/index/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                success: profil => { resolve(profil); },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+    static getUserByIdDemote(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/demote/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                data: {},
+                success: () => {
+                    resolve(true);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+    static BlockUser(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + "/accounts/block/" + id,
+                contentType: 'text/plain',
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                data: {},
+                success: () => {
+                    resolve(true);
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
     }
     static setHttpErrorState(xhr) {
         if (xhr.responseJSON)
@@ -78,32 +137,6 @@ class API {
                 contentType: 'application/json',
                 data: JSON.stringify(profil),
                 success: profil => { resolve(profil); },
-                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
-            });
-        });
-    }
-    static PromoteUser(UserId) {
-        API.initHttpState();
-        return new Promise(resolve => {
-            $.ajax({
-                url: serverHost + "/accounts/promote",
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ Id: UserId }),
-                success: () => { resolve(true); },
-                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
-            });
-        });
-    }
-    static BlockUser(UserId) {
-        API.initHttpState();
-        return new Promise(resolve => {
-            $.ajax({
-                url: serverHost + "/accounts/block",
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ Id: UserId }),
-                success: () => { resolve(true); },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });
         });
@@ -179,22 +212,6 @@ class API {
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + "/accounts",
-                contentType: 'application/json',
-                type: 'GET',
-                headers: API.getBearerAuthorizationToken(),
-                success: (data, status, xhr) => {
-                    let ETag = xhr.getResponseHeader("ETag");
-                    resolve({ data, ETag });
-                },
-                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
-            });
-        });
-    }
-    static GetAccount(userId) {
-        API.initHttpState();
-        return new Promise(resolve => {
-            $.ajax({
-                url: serverHost + "/accounts/index/" + userId,
                 contentType: 'application/json',
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
@@ -286,9 +303,3 @@ class API {
         });
     }
 }
-
-
-
-////////////////////// Local storage management/////////////////////////////////////////////////
-
-
