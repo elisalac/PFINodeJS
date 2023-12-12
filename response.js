@@ -88,7 +88,7 @@ export default class Response {
     unprocessable(errormessage = '') { return this.status(422, errormessage); }   // Unprocessable Entity status
 
     // Custom status
-    unverifiedUser(errormessage = '') { return this.status(480, errormessage); }  // custom bad request status
+    unverifiedUser(errormessage = '') { return this.status(480, errormessage); }    // custom bad request status
     userNotFound(errormessage = '') { return this.status(481, errormessage); }    // custom bad request status
     wrongPassword(errormessage = '') { return this.status(482, errormessage); }   // custom bad request status
 
