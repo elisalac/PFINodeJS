@@ -776,13 +776,17 @@ function renderAddImage() {
                                 required
                                 RequireMessage = 'Veuillez entrez un titre à votre image'
                                 InvalidMessage="Le titre que vous avez écrit est invalide">
-                <input class="form-control"
-                                type="text"
+                <textarea class="form-control"
                                 matchedInputId="ImageDesc"
                                 name="ImageDesc"
                                 id="ImageDesc"
-                                placeholder="Description"
-                                InvalidMessage="La description que vous avez écrit est invalide">
+                                placeholder="Description"></textarea>
+                <input class="form-check-input"
+                        type="checkbox"
+                        matchedInputId="ImageShared"
+                        name="ImageShared" 
+                        id="ImageShared">
+                        <label style="margin-top:15px" for="ImageShared">Partagée</label>
             </fieldset>
             <fieldset>
                 <legend>Image</legend>
@@ -793,7 +797,11 @@ function renderAddImage() {
                     waitingImage="images/Loading_icon.gif">
                 </div>
             </fieldset>
+            <input type='submit' name='submit' id='saveImage' value="Enregistrer" class="form-control btn-primary">
         </form>
+        <div class="cancel">
+            <button class="form-control btn-secondary" id="cancelAddImageCmd">Annuler</button>
+        </div>
     `);
 
     initFormValidation();
