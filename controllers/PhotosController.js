@@ -15,10 +15,11 @@ export default
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
             if (this.repository != null) {
                 photo.Date = utilities.nowInSeconds();
-                if (photo.Shared == 'true') {
+                if (photo.Shared == "true") {
                     photo.Shared = true;
+                } else {
+                    photo.Shared = false;
                 }
-                console.log(photo);
                 let newImage = this.repository.add(photo);
                 if (this.repository.model.state.isValid) {
                     this.HttpContext.response.created(newImage);

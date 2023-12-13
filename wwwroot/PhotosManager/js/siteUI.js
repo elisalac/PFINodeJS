@@ -813,6 +813,7 @@ function renderAddImage() {
         $('#addImageForm').on('submit', async function (event) {
             let data = getFormData($('#addImageForm'));
             event.preventDefault();
+            console.log(data);
             let result = await API.CreatePhoto(data);
             if (result) {
                 renderPhotos();
