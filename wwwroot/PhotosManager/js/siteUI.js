@@ -355,8 +355,38 @@ async function renderPhotos() {
 }
 async function renderPhotosList() {
     eraseContent();
-    $("#content").append(``);
+    let code = "";
+    let photos = await API.GetPhotos();
+    photos.data.forEach(async (photo) => {
+        let user = await API.GetAccount(photo.OwnerId);
+        if (user) {
+            let shared = "";
+            let date = convertToFrenchDate(photo.Date);
+            if (photo.Shared) {
+                shared = "<img src='images/shared.png' class='UserAvatarSmall'/>"
+            }
+            code += `
+            <div class="PhotoLayout">
+                <div class="photoTitleContainer">
+                    <span class="photoTitle">${photo.Title}</span>
+                </div>
+                <img src="${photo.Image}" class="photoImage"/>
+                <img scr="${user.data.Avatar}" class="UserAvatarSmall"/>
+                ${shared}
+                <span class="photoCreationDate">${date}</span>
+            </div>
+        `;
+        }
+    });
+    console.log(code);
+    $("#content").append(`
+        <div class="photosLayout">
+            ${code}
+        </div>
+    `);
+
 }
+
 function renderVerify() {
     eraseContent();
     UpdateHeader("Vérification", "verify");
@@ -788,8 +818,7 @@ function renderAddImage() {
                             type="checkbox"
                             matchedInputId="Shared"
                             name="Shared" 
-                            id="Shared"
-                            value=true>
+                            id="Shared">
                             <label style="margin-top:15px" for="ImageShared">Partagée</label>
                 </fieldset>
                 <fieldset>
@@ -812,6 +841,12 @@ function renderAddImage() {
         $('#cancelAddImageCmd').on('click', renderPhotos);
         $('#addImageForm').on('submit', async function (event) {
             let data = getFormData($('#addImageForm'));
+            if (data.Shared != null) {
+                data.Shared = true;
+            } else {
+                data.Shared = false;
+            }
+            data.Date = nowInSeconds();
             event.preventDefault();
             console.log(data);
             let result = await API.CreatePhoto(data);
@@ -822,4 +857,9 @@ function renderAddImage() {
             }
         });
     }
+}
+
+const nowInSeconds = () => {
+    const now = new Date();
+    return Math.round(now.getTime() / 1000);
 }
