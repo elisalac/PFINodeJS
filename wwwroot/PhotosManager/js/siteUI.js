@@ -355,7 +355,7 @@ async function renderPhotos() {
 }
 async function renderPhotosList() {
     eraseContent();
-    $("#content").append("<h2> En contruction </h2>");
+    $("#content").append(``);
 }
 function renderVerify() {
     eraseContent();
@@ -761,7 +761,6 @@ function getFormData($form) {
 function renderAddImage() {
     timeout();
     let loggedUser = API.retrieveLoggedUser();
-    let date = nowInSeconds();
     if (loggedUser) {
         eraseContent();
         UpdateHeader("Ajout de photos", "addImage");
@@ -771,7 +770,6 @@ function renderAddImage() {
                 <fieldset>
                     <legend>Informations</legend>
                     <input type="hidden" name="OwnerId" id="Id" value="${loggedUser.Id}"/>
-                    <input type="hidden" name="Date" id="Date" value="${date}"/>
                     <input  class="form-control" 
                                     type="text" 
                                     matchedInputId="ImageTitle"
