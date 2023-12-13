@@ -788,7 +788,8 @@ function renderAddImage() {
                             type="checkbox"
                             matchedInputId="Shared"
                             name="Shared" 
-                            id="Shared">
+                            id="Shared"
+                            value=true>
                             <label style="margin-top:15px" for="ImageShared">Partagée</label>
                 </fieldset>
                 <fieldset>
@@ -812,7 +813,6 @@ function renderAddImage() {
         $('#addImageForm').on('submit', async function (event) {
             let data = getFormData($('#addImageForm'));
             event.preventDefault();
-
             let result = await API.CreatePhoto(data);
             if (result) {
                 renderPhotos();
