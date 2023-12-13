@@ -15,8 +15,9 @@ export default
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
             if (this.repository != null) {
                 photo.Date = utilities.nowInSeconds();
+                let newImage = this.repository.add(photo);
                 if (this.repository.model.state.isValid) {
-                    this.HttpContext.response.created(photo);
+                    this.HttpContext.response.created(newImage);
                 } else {
                     if (this.repository.model.state.inConflict)
                         this.HttpContext.response.conflict(this.repository.model.state.errors);

@@ -786,9 +786,9 @@ function renderAddImage() {
                                     placeholder="Description"></textarea>
                     <input class="form-check-input"
                             type="checkbox"
-                            matchedInputId="ImageShared"
+                            matchedInputId="Shared"
                             name="Shared" 
-                            id="ImageShared">
+                            id="Shared">
                             <label style="margin-top:15px" for="ImageShared">Partagée</label>
                 </fieldset>
                 <fieldset>
