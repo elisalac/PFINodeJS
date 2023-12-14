@@ -363,14 +363,12 @@ async function renderPhotosList() {
             let boutons = "";
             let partage = "";
             let date = convertToFrenchDate(photo.Date);
-            if(currentUser.Id == photo.Owner.Id)
-            {
+            if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
                 <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
             }
-            if(photo.Shared)
-            {
-                partage =  `<img class="UserAvatarSmall" src="images/shared.png" />`
+            if (photo.Shared) {
+                partage = `<img class="UserAvatarSmall" src="images/shared.png" />`
             }
             Image += `
             <div class="photoLayout">
@@ -398,10 +396,10 @@ async function renderPhotosList() {
             let id = $(this).attr("photoId");
             renderPhotoDetail(id);
         })
-        
+
     }
     else {
-        renderError("Oh non!!");
+        renderError("Une erreur est survenue");
     }
 
 }
@@ -413,15 +411,15 @@ async function renderPhotoDetail(id) {
         let date = convertToFrenchDate(photo.Date);
         eraseContent();
         $("#content").append(`
-       <div class="photoDetailsOwner">
-       <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
-       <span style="margin-left:10px"> ${photo.Owner.Name}</span>       
-       </div>
-       <hr>
-       <span class="photoDetailsTitle">${photo.Title}</span>
-       <img class="photoDetailsLargeImage" src="${photo.Image}" />
-       <span class="photoDetailsCreationDate">${date}</span>
-       <div class="photoDetailsDescription">${photo.Description}</div>
+            <div class="photoDetailsOwner">
+                <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+                <span style="margin-left:10px"> ${photo.Owner.Name}</span>       
+            </div>
+            <hr>
+            <span class="photoDetailsTitle">${photo.Title}</span>
+            <img class="photoDetailsLargeImage" src="${photo.Image}" />
+            <span class="photoDetailsCreationDate">${date}</span>
+            <div class="photoDetailsDescription">${photo.Description}</div>
         `);
     }
     else {
@@ -429,14 +427,37 @@ async function renderPhotoDetail(id) {
     }
 
 }
-async function renderDeletePhoto(photoId)
-{
+async function renderDeletePhoto(photoId) {
     timeout();
     eraseContent();
-    let photo = await API.GetPhotosById(id);
-    if(photo != null)
-    {
-        
+    let photo = await API.GetPhotosById(photoId);
+    if (photo != null) {
+        $("#content").append(`
+                <div class="content loginForm">
+                    <br>
+                    <div class="form UserRow ">
+                        <h4> Voulez-vous vraiment effacer cette photo? </h4>
+                        <div class="photoLayout">
+                            <span class="photoTitle">${photo.Title}</span>
+                            <img src="${photo.Image}" class="photoImage"/>
+                        </div>
+                    </div>           
+                    <div class="form">
+                        <button class="form-control btn-danger" id="deleteImageCmd">Effacer la photo</button>
+                        <br>
+                        <button class="form-control btn-secondary" id="abortDeleteImageCmd">Annuler</button>
+                    </div>
+                </div>
+            `);
+        $("#deleteImageCmd").on("click", async function () {
+            let result = await API.DeletePhoto(photoId);
+            if (result) {
+                renderPhotos();
+            } else {
+                renderError("Une erreur est survenue");
+            }
+        });
+        $("#abortDeleteImageCmd").on("click", renderPhotos);
     }
 
 }
