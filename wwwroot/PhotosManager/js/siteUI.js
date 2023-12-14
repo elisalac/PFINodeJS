@@ -355,46 +355,96 @@ async function renderPhotos() {
 }
 async function renderPhotosList() {
     eraseContent();
+    let currentUser = await API.retrieveLoggedUser();
+    let Image = "";
     let photos = await API.GetPhotos();
-    photos.data.forEach(async (photo) => {
-        let user = (await API.GetAccount(photo.OwnerId)).data;
-        if (user) {
-            let shared = "";
+    if (photos != null) {
+        photos.data.forEach((photo) => {
+            let boutons = "";
+            let partage = "";
             let date = convertToFrenchDate(photo.Date);
-            if (photo.Shared) {
-                shared = "<img src='images/shared.png' class='UserAvatarSmall'/>"
+            if(currentUser.Id == photo.Owner.Id)
+            {
+                boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
+                <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
             }
-            $("#contentPhoto").append(`
-                <div class="photoLayout">
-                    <div class="photoTitleContainer">
-                        <span class="photoTitle">${photo.Title}</span>
-                    </div>
-                    <span class="detailsImage" imageId="${photo.Id}" title="Voir les détails de ${photo.Title}">
-                        <div class="photoImage" style="background-image:url(${photo.Image})">
-                            <img src="${user.Avatar}" class="UserAvatarSmall"/>
-                            ${shared}
-                        </div>
-                    </span>
-                    <span class="photoCreationDate">${date}</span>
-                </div>
-            `);
+            if(photo.Shared)
+            {
+                partage =  `<img class="UserAvatarSmall" src="images/shared.png" />`
+            }
+            Image += `
+            <div class="photoLayout">
+            <div class="photoTitleContainer">
+            <span class="photoTitle">${photo.Title}</span>
+             ${boutons}
+            </div>
+            <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
+            <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+            ${partage}
+            </div>
+            <span class="photoCreationDate">${date}</span>
+            </div>`
+        })
+        $("#content").append(`
+            <div id="contentImage" class="photosLayout">
+           ${Image}
+        </div>`
+        );
+        $(".deleteCmd").on('click', function () {
+            let id = $(this).attr("deletePhotoId");
+            renderDeletePhoto(id);
+        })
+        $(".photoImage").on('click', function () {
+            let id = $(this).attr("photoId");
+            renderPhotoDetail(id);
+        })
+        
+    }
+    else {
+        renderError("Oh non!!");
+    }
 
-            $(".detailsImage").on('click', function () {
-                let imageId = $(this).attr("imageId");
-                renderImageDetails(imageId);
-            })
-        }
-    });
-    $("#content").append(`
-        <div class="photosLayout" id="contentPhoto" style="margin-left:30px">
-        </div>
-    `);
+}
+async function renderPhotoDetail(id) {
+    timeout();
+    eraseContent();
+    let photo = await API.GetPhotosById(id);
+    if (photo != null) {
+        let date = convertToFrenchDate(photo.Date);
+        eraseContent();
+        $("#content").append(`
+       <div class="photoDetailsOwner">
+       <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+       <span style="margin-left:10px"> ${photo.Owner.Name}</span>       
+       </div>
+       <hr>
+       <span class="photoDetailsTitle">${photo.Title}</span>
+       <img class="photoDetailsLargeImage" src="${photo.Image}" />
+       <span class="photoDetailsCreationDate">${date}</span>
+       <div class="photoDetailsDescription">${photo.Description}</div>
+        `);
+    }
+    else {
+        renderError("Description introuvable!");
+    }
+
+}
+async function renderDeletePhoto(photoId)
+{
+    timeout();
+    eraseContent();
+    let photo = await API.GetPhotosById(id);
+    if(photo != null)
+    {
+        
+    }
+
 }
 
 async function renderImageDetails(imageId) {
-    eraseContent();
+
     UpdateHeader("Détails", "details");
-    let image = (await API.GetPhotosById(imageId));
+    let image = await API.GetPhotosById(imageId);
     let user = (await API.GetAccount(image.OwnerId)).data;
     let date = convertToFrenchDate(image.Date);
     $("#content").append(`
