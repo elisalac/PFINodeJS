@@ -355,36 +355,58 @@ async function renderPhotos() {
 }
 async function renderPhotosList() {
     eraseContent();
-    let code = "";
     let photos = await API.GetPhotos();
     photos.data.forEach(async (photo) => {
-        let user = await API.GetAccount(photo.OwnerId);
+        let user = (await API.GetAccount(photo.OwnerId)).data;
         if (user) {
             let shared = "";
             let date = convertToFrenchDate(photo.Date);
             if (photo.Shared) {
                 shared = "<img src='images/shared.png' class='UserAvatarSmall'/>"
             }
-            code += `
-            <div class="PhotoLayout">
+            $("#contentPhoto").append(`
+            <div class="photoLayout">
                 <div class="photoTitleContainer">
                     <span class="photoTitle">${photo.Title}</span>
                 </div>
-                <img src="${photo.Image}" class="photoImage"/>
-                <img scr="${user.data.Avatar}" class="UserAvatarSmall"/>
-                ${shared}
+                <button class="detailsImage" imageId=${photo.Id} style="all:unset">
+                <div class="photoImage" style="background-image:url(${photo.Image})">
+                    <img src="${user.Avatar}" class="UserAvatarSmall"/>
+                    ${shared}
+                </div>
+                </button>
                 <span class="photoCreationDate">${date}</span>
             </div>
-        `;
+        `);
         }
     });
-    console.log(code);
     $("#content").append(`
-        <div class="photosLayout">
-            ${code}
+        <div class="photosLayout" id="contentPhoto" style="margin-left:30px">
         </div>
     `);
+    $(".detailsImage").on('click', function () {
+        let imageId = $(this).attr("imageId");
+        renderImageDetails(imageId);
+    })
+}
 
+async function renderImageDetails(imageId) {
+    eraseContent();
+    UpdateHeader("Détails", "details");
+    let image = (await API.GetPhotosById(imageId)).data;
+    let user = (await API.GetAccount(image.OwnerId)).data;
+    let date = convertToFrenchDate(image.Date);
+    $("#content").append(`
+        <div class="photoDetailsOwner">
+            <img class="UserAvatar" src="${user.Avatar}"/>
+            <span class="UserName">${user.Name}</span>
+        </div>
+        <hr>
+        <span class="photoDetailsTitle">${image.Title}</span>
+        <img class="photoDetailsLargeImage" src="${image.Image}"/>
+        <span class="photoDetailsCreationDate">${date}</span>
+        <span class="photoDetailsDescription">${image.Description}</span>
+    `);
 }
 
 function renderVerify() {
