@@ -365,41 +365,42 @@ async function renderPhotosList() {
                 shared = "<img src='images/shared.png' class='UserAvatarSmall'/>"
             }
             $("#contentPhoto").append(`
-            <div class="photoLayout">
-                <div class="photoTitleContainer">
-                    <span class="photoTitle">${photo.Title}</span>
-                </div>
-                <span class="detailsImage cmdIconVisible" imageId="${photo.Id}" title="Voir les détails de ${photo.Title}">
-                    <div class="photoImage" style="background-image:url(${photo.Image})">
-                        <img src="${user.Avatar}" class="UserAvatarSmall"/>
-                        ${shared}
+                <div class="photoLayout">
+                    <div class="photoTitleContainer">
+                        <span class="photoTitle">${photo.Title}</span>
                     </div>
-                </span>
-                <span class="photoCreationDate">${date}</span>
-            </div>
-        `);
+                    <span class="detailsImage" imageId="${photo.Id}" title="Voir les détails de ${photo.Title}">
+                        <div class="photoImage" style="background-image:url(${photo.Image})">
+                            <img src="${user.Avatar}" class="UserAvatarSmall"/>
+                            ${shared}
+                        </div>
+                    </span>
+                    <span class="photoCreationDate">${date}</span>
+                </div>
+            `);
+
+            $(".detailsImage").on('click', function () {
+                let imageId = $(this).attr("imageId");
+                renderImageDetails(imageId);
+            })
         }
     });
     $("#content").append(`
         <div class="photosLayout" id="contentPhoto" style="margin-left:30px">
         </div>
     `);
-    $(".detailsImage").on('click', function () {
-        let imageId = $(this).attr("imageId");
-        renderImageDetails(imageId);
-    })
 }
 
 async function renderImageDetails(imageId) {
     eraseContent();
     UpdateHeader("Détails", "details");
-    let image = (await API.GetPhotosById(imageId)).data;
+    let image = (await API.GetPhotosById(imageId));
     let user = (await API.GetAccount(image.OwnerId)).data;
     let date = convertToFrenchDate(image.Date);
     $("#content").append(`
         <div class="photoDetailsOwner">
             <img class="UserAvatar" src="${user.Avatar}"/>
-            <span class="UserName">${user.Name}</span>
+            <span class="UserName" style="margin-left:10px">${user.Name}</span>
         </div>
         <hr>
         <span class="photoDetailsTitle">${image.Title}</span>
