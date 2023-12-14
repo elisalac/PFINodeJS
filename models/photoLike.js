@@ -5,5 +5,7 @@ export default class PhotoLikeModel extends Model {
         super();
         this.addField('ImageId', 'string');
         this.addField('userLikeId', 'string');
+
+        this.setKey("ImageId");
     }
 }

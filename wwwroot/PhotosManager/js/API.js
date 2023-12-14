@@ -285,6 +285,50 @@ class API {
             });
         });
     }
+
+    static AddLike(data) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API,
+                type: 'POST',
+                headers: API.getBearerAuthorizationToken(),
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: data => { resolve(data) },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            })
+        })
+    }
+
+    static GetLikes() {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API,
+                headers: API.getBearerAuthorizationToken(),
+                type: 'GET',
+                success: (data, status, xhr) => {
+                    let ETag = xhr.getResponseHeader("ETag");
+                    resolve({ data, ETag });
+                },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+
+    static DeleteLikeById(id) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API + "/" + id,
+                type: 'DELETE',
+                headers: API.getBearerAuthorizationToken(),
+                success: () => { resolve(true) },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
 }
 
 

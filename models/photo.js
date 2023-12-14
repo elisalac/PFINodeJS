@@ -1,6 +1,7 @@
 import Model from './model.js';
 import UserModel from './user.js';
 import Repository from '../models/repository.js';
+import PhotoLikeModel from './photoLike.js';
 
 export default class Photo extends Model {
     constructor() {
