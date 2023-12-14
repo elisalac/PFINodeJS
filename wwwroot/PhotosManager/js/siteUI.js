@@ -369,12 +369,12 @@ async function renderPhotosList() {
                 <div class="photoTitleContainer">
                     <span class="photoTitle">${photo.Title}</span>
                 </div>
-                <button class="detailsImage" imageId=${photo.Id} style="all:unset">
-                <div class="photoImage" style="background-image:url(${photo.Image})">
-                    <img src="${user.Avatar}" class="UserAvatarSmall"/>
-                    ${shared}
-                </div>
-                </button>
+                <span class="detailsImage cmdIconVisible" imageId="${photo.Id}" title="Voir les détails de ${photo.Title}">
+                    <div class="photoImage" style="background-image:url(${photo.Image})">
+                        <img src="${user.Avatar}" class="UserAvatarSmall"/>
+                        ${shared}
+                    </div>
+                </span>
                 <span class="photoCreationDate">${date}</span>
             </div>
         `);
