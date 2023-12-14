@@ -365,23 +365,26 @@ async function renderPhotosList() {
             let date = convertToFrenchDate(photo.Date);
             if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
-                <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
+            <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
             }
             if (photo.Shared) {
                 partage = `<img class="UserAvatarSmall" src="images/shared.png" />`
+
             }
-            Image += `
-            <div class="photoLayout">
-            <div class="photoTitleContainer">
-            <span class="photoTitle">${photo.Title}</span>
-             ${boutons}
-            </div>
-            <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
-            <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
-            ${partage}
-            </div>
-            <span class="photoCreationDate">${date}</span>
-            </div>`
+            if (currentUser.Id == photo.Owner.Id || photo.Shared) {
+                Image += `
+                <div class="photoLayout">
+                <div class="photoTitleContainer">
+                <span class="photoTitle">${photo.Title}</span>
+                 ${boutons}
+                </div>
+                <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
+                <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+                ${partage}
+                </div>
+                <span class="photoCreationDate">${date}</span>
+                </div>`
+            }
         })
         $("#content").append(`
             <div id="contentImage" class="photosLayout">
