@@ -301,8 +301,19 @@ class API {
         })
     }
 
-    static GetLikes() {
+    static GetLikeById(photoID) {
         API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photos_API+"?ImageId=" + photoID,
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                success: data => { resolve(data); },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+    static GetLike() {
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + photoLikes_API,

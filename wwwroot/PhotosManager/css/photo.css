@@ -80,7 +80,7 @@
 
 .likesSummary {
     display: grid;
-    grid-template-columns: 60px 30px;
+    grid-template-columns: 10px 30px;
     align-items: center;
     text-align: right;
 }

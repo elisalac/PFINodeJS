@@ -381,32 +381,19 @@ async function renderPhotosList() {
     eraseContent();
     let currentUser = await API.retrieveLoggedUser();
     let Image = "";
+    let likeCss = "fa-regular fa-thumbs-up";
+    let nbLikes=0;
+    
     let photos = await API.GetPhotos();
     if (photos != null) {
         photos.data.forEach(async (photo) => {
-            let likes = await API.GetLikes();
-            let likeList = "";
-            if (likes.data != null) {
-                likes.data.forEach(like => {
-                    if (like.ImageId == photo.Id) {
-                        likeList += like;
-                    }
-                });
-            }
+            let likes = photo.likes
             console.log(likes);
-            let nbLike = "fa-regular fa-thumb up";
-            if (likeList == null) {
-                nbLike = 0;
-            } else {
-                nbLike = likes.length;
-                if (likeList.userLikeId == currentUser) {
-                    likeCss = "fa fa-thumb-up";
-                }
-            }
+            
             let boutons = "";
             let partage = "";
             let date = convertToFrenchDate(photo.Date);
-            let likeCss = "";
+            
 
             if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
@@ -427,8 +414,13 @@ async function renderPhotosList() {
                 <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
                 ${partage}
                 </div>
+                <div style="display:grid; grid-template-columns: 300px 10px 30px;">
                 <span class="photoCreationDate">${date}</span>
-                <span class="${likeCss}">${nbLike}</span>
+                <div class="likesSummary">
+                <span class="photoCreationDate">${nbLikes}</span>
+                <span class="likecmd  cmdIcon ${likeCss}" photoId=${photo.Id}></span>
+                </div>
+                </div>
                 </div>`
             }
         })
@@ -448,6 +440,13 @@ async function renderPhotosList() {
         $(".photoImage").on('click', function () {
             let id = $(this).attr("photoId");
             renderPhotoDetail(id);
+        })
+        $(".likecmd").on("click",async function(){
+            let id = $(this).attr("photoId");
+            let userId = currentUser.Id;
+            let likeData = {ImageId:id,userLikeId:userId}
+            let result =await API.AddLike(likeData);
+            console.log(result);
         })
 
     }
