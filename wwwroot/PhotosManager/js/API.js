@@ -301,11 +301,11 @@ class API {
         })
     }
 
-    static GetLikeById(photoID) {
+    static GetLikeByPhotoId(photoID) {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + photos_API+"?ImageId=" + photoID,
+                url: serverHost + photoLikes_API+"?ImageId=" + photoID,
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
                 success: data => { resolve(data); },
@@ -313,28 +313,16 @@ class API {
             });
         });
     }
-    static GetLike() {
-        return new Promise(resolve => {
-            $.ajax({
-                url: serverHost + photoLikes_API,
-                headers: API.getBearerAuthorizationToken(),
-                type: 'GET',
-                success: (data, status, xhr) => {
-                    let ETag = xhr.getResponseHeader("ETag");
-                    resolve({ data, ETag });
-                },
-                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
-            });
-        });
-    }
 
-    static DeleteLikeById(id) {
+    static DeleteLikeById(data) {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + photoLikes_API + "/" + id,
+                url: serverHost + photoLikes_API,
                 type: 'DELETE',
                 headers: API.getBearerAuthorizationToken(),
+                contentType: 'application/json',
+                data: JSON.stringify(data),
                 success: () => { resolve(true) },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });

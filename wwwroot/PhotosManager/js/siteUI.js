@@ -35,7 +35,6 @@ function getViewPortPhotosRanges() {
     VerticalPhotosCount = Math.round($("#content").innerHeight() / photoContainerHeight);
     HorizontalPhotosCount = Math.round($("#content").innerWidth() / photoContainerWidth);
     limit = (VerticalPhotosCount + 1) * HorizontalPhotosCount;
-    console.log("VerticalPhotosCount:", VerticalPhotosCount, "HorizontalPhotosCount:", HorizontalPhotosCount)
     offset = 0;
 }
 // pour la pagination
@@ -52,9 +51,7 @@ function installWindowResizeHandler() {
             $(window).trigger('resizeend');
         }, resizeEndTriggerDelai);
     }).on('resizestart', function () {
-        console.log('resize start');
     }).on('resizeend', function () {
-        console.log('resize end');
         if ($('#photosLayout') != null) {
             getViewPortPhotosRanges();
             if (currentViewName == "photosList")
@@ -169,7 +166,6 @@ function UpdateHeader(viewTitle, viewName) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Actions and command
 async function login(credential) {
-    console.log("login");
     loginMessage = "";
     EmailError = "";
     passwordError = "";
@@ -196,7 +192,6 @@ async function login(credential) {
     }
 }
 async function logout() {
-    console.log('logout');
     await API.logout();
     renderLoginForm();
 }
@@ -382,19 +377,28 @@ async function renderPhotosList() {
     let currentUser = await API.retrieveLoggedUser();
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
-    let nbLikes=0;
+    let allUser = [];
     
     let photos = await API.GetPhotos();
     if (photos != null) {
         photos.data.forEach(async (photo) => {
-            let likes = photo.likes
-            console.log(likes);
-            
+            let likes =  await API.GetLikeByPhotoId(photo.Id);
+            let likeCmd = "likecmd";
             let boutons = "";
             let partage = "";
             let date = convertToFrenchDate(photo.Date);
-            
-
+            if(likes)
+            {
+                likes.forEach(async (like) =>{
+                    if(currentUser.Id == like.userLikeId)
+                    {
+                        likeCmd = "unlikeCmd";
+                        likeCss = "fa fa-thumbs-up"
+                    }
+                    username = await API.GetAccount(like.userLikeId).Name
+                    allUser.push(username)
+                });
+            }
             if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
             <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
@@ -417,8 +421,8 @@ async function renderPhotosList() {
                 <div style="display:grid; grid-template-columns: 300px 10px 30px;">
                 <span class="photoCreationDate">${date}</span>
                 <div class="likesSummary">
-                <span class="photoCreationDate">${nbLikes}</span>
-                <span class="likecmd  cmdIcon ${likeCss}" photoId=${photo.Id}></span>
+                <span class="photoCreationDate">${likes.length}</span>
+                <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} title="${allUser}"></span>
                 </div>
                 </div>
                 </div>`
@@ -445,8 +449,13 @@ async function renderPhotosList() {
             let id = $(this).attr("photoId");
             let userId = currentUser.Id;
             let likeData = {ImageId:id,userLikeId:userId}
-            let result =await API.AddLike(likeData);
-            console.log(result);
+            await API.AddLike(likeData);
+        })
+        $(".unlikeCmd").on("click",async function(){
+            let id = $(this).attr("photoId");
+            let userId = currentUser.Id;
+            let likeData = {ImageId:id,userLikeId:userId}
+            await API.DeleteLike(likeData);
         })
 
     }
@@ -1000,7 +1009,6 @@ function renderLoginForm() {
 function getFormData($form) {
     const removeTag = new RegExp("(<[a-zA-Z0-9]+>)|(</[a-zA-Z0-9]+>)", "g");
     var jsonObject = {};
-    console.log($form.serializeArray());
     $.each($form.serializeArray(), (index, control) => {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
@@ -1067,7 +1075,6 @@ function renderAddImage() {
             }
             data.Date = nowInSeconds();
             event.preventDefault();
-            console.log(data);
             let result = await API.CreatePhoto(data);
             if (result) {
                 renderPhotos();
