@@ -352,7 +352,18 @@ class API {
             });
         });
     }
-
+    static GetUserLike(photoID, userId) {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API + "?ImageId=" + photoID + "&UserId=" + userId,
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                success: data => { resolve(data); },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
 }
 
 

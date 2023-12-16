@@ -499,6 +499,8 @@ async function renderPhotosList() {
                         }
                     }
                 })
+            } else {
+                likeCss = "fa-regular fa-thumbs-up";
             }
 
             if (currentUser.Id == photo.Owner.Id) {
@@ -561,7 +563,6 @@ async function renderPhotosList() {
     else {
         renderError("Une erreur est survenue");
     }
-
 }
 async function renderPhotoDetail(id) {
     timeout();
