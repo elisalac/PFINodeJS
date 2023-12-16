@@ -10,6 +10,7 @@ let passwordError = "";
 let currentETag = "";
 let currentViewName = "photosList";
 let delayTimeOut = 200; // seconds
+let refreshIntervalId = "";
 
 // pour la pagination
 let photoContainerWidth = 400;
@@ -36,11 +37,11 @@ async function Init_UI() {
     else
         renderLoginForm();
 
-    start_Periodic_Refresh();
+    //start_Periodic_Refresh();
 }
 
 function start_Periodic_Refresh() {
-    setInterval(async () => {
+    refreshIntervalId = setInterval(async () => {
         let etag = await API.HEAD();
         if (currentETag != etag) {
             currentETag = etag;
@@ -48,6 +49,11 @@ function start_Periodic_Refresh() {
         }
     },
         periodicRefreshPeriod * 1000);
+}
+
+function stop_Periodic_Refresh() {
+    clearInterval(refreshIntervalId);
+    console.log("cleared");
 }
 
 function saveContentScrollPosition() {
@@ -459,6 +465,7 @@ async function renderPhotosList() {
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
     let allUser = [];
+    let titleUsers = "";
 
     let photos = await API.GetPhotos();
     if (photos != null) {
@@ -489,8 +496,18 @@ async function renderPhotosList() {
                             photoLikeId = `photoLikeId=${likeId}`;
                         }
                     }
-                    username = (await API.GetAccount(like.userLikeId)).data.Name;
-                    allUser.push(username);
+                    console.log(like.userLikeId);
+                    username = (await API.GetAccount(like.userLikeId));
+                    console.log(username);
+                    allUser.push(username.Name);
+                    let userIndex = 0;
+                    allUser.forEach(user => {
+                        userIndex++;
+                        if (userIndex <= 10) {
+                            titleUsers = `${user}\n`;
+                        }
+                    });
+                    console.log(titleUsers);
                 })
             } else {
                 likeCss = "fa-regular fa-thumbs-up";
@@ -517,7 +534,7 @@ async function renderPhotosList() {
                         <span class="photoCreationDate">${date}</span>
                         <div class="likesSummary">
                             <span class="photoCreationDate">${likeList.length}</span>
-                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
+                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${titleUsers}"></span>
                         </div>
                     </div>
                 </div>`
@@ -528,6 +545,7 @@ async function renderPhotosList() {
                 ${Image}
             </div>`
         );
+        restoreContentScrollPosition();
         $(".deleteCmd").on('click', function () {
             let id = $(this).attr("deletePhotoId");
             renderDeletePhoto(id);
