@@ -53,7 +53,6 @@ function start_Periodic_Refresh() {
 
 function stop_Periodic_Refresh() {
     clearInterval(refreshIntervalId);
-    console.log("cleared");
 }
 
 function saveContentScrollPosition() {
@@ -464,28 +463,22 @@ async function renderPhotosList() {
     let currentUser = await API.retrieveLoggedUser();
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
-    let allUser = [];
-    let titleUsers = "";
 
     let photos = await API.GetPhotos();
     if (photos != null) {
         let likes = await API.GetLikes();
         currentETag = likes.ETag;
         photos.data.forEach(async (photo) => {
-            let likeList = [];
+            let allUser = [];
             let likeCmd = "likecmd";
             let boutons = "";
             let partage = "";
             let likeId = "";
             let date = convertToFrenchDate(photo.Date);
             let photoLikeId = "";
-            if (likes) {
-                likes.data.forEach(async (like) => {
-                    if (like.ImageId == photo.Id) {
-                        likeList.push(like);
-                    }
-                });
-            }
+            let username = "";
+            let likeList = likes.data.filter(like => like.ImageId == photo.Id);
+            let previousOwnerName = "";
             if (likeList.length > 0) {
                 likeList.forEach(async (like) => {
                     if (currentUser.Id == like.userLikeId) {
@@ -495,23 +488,19 @@ async function renderPhotosList() {
                             likeId = like.Id;
                             photoLikeId = `photoLikeId=${likeId}`;
                         }
+                    } else {
+                        likeCss = "fa-regular fa-thumbs-up";
                     }
-                    console.log(like.userLikeId);
-                    username = (await API.GetAccount(like.userLikeId));
-                    console.log(username);
-                    allUser.push(username.Name);
-                    let userIndex = 0;
-                    allUser.forEach(user => {
-                        userIndex++;
-                        if (userIndex <= 10) {
-                            titleUsers = `${user}\n`;
+                    if (like.ImageId == photo.Id) {
+                        username = like.OwnerName;
+                        if (previousOwnerName != username) {
+                            allUser.push("\n" + username);
+                            previousOwnerName = username;
                         }
-                    });
-                    console.log(titleUsers);
+                    }
                 })
-            } else {
-                likeCss = "fa-regular fa-thumbs-up";
             }
+
             if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
             <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
@@ -534,7 +523,7 @@ async function renderPhotosList() {
                         <span class="photoCreationDate">${date}</span>
                         <div class="likesSummary">
                             <span class="photoCreationDate">${likeList.length}</span>
-                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${titleUsers}"></span>
+                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
                         </div>
                     </div>
                 </div>`
@@ -561,7 +550,7 @@ async function renderPhotosList() {
         $(".likecmd").on("click", async function () {
             let id = $(this).attr("photoId");
             let userId = currentUser.Id;
-            let likeData = { ImageId: id, userLikeId: userId }
+            let likeData = { ImageId: id, userLikeId: userId };
             await API.AddLike(likeData);
         })
         $(".unlikeCmd").on("click", async function () {
