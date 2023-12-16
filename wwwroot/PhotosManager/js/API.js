@@ -12,6 +12,19 @@ class API {
         this.currentStatus = 0;
         this.error = false;
     }
+    static async HEAD() {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API,
+                type: 'HEAD',
+                contentType: 'text/plain',
+                headers: API.getBearerAuthorizationToken(),
+                complete: data => { resolve(data.getResponseHeader('ETag')); },
+                error: (xhr) => { console.log(xhr); resolve(null); }
+            });
+        });
+    }
     static setHttpErrorState(xhr) {
         if (xhr.responseJSON)
             this.currentHttpError = xhr.responseJSON.error_description;
@@ -334,7 +347,10 @@ class API {
                 url: serverHost + photoLikes_API,
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
-                success: data => { resolve(data); },
+                success: (data, status, xhr) => {
+                    let ETag = xhr.getResponseHeader("ETag");
+                    resolve({ data, ETag });
+                },
                 error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
             });
         });

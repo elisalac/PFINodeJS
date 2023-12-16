@@ -1,4 +1,5 @@
 //<span class="cmdIcon fa-solid fa-ellipsis-vertical"></span>
+const periodicRefreshPeriod = 10;
 let contentScrollPosition = 0;
 let sortType = "date";
 let keywords = "";
@@ -25,7 +26,8 @@ let sortByLikeCSS = "menuIcon fa fa-fw mx-2";
 let ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
 
 Init_UI();
-function Init_UI() {
+async function Init_UI() {
+    currentETag = await API.HEAD();
     getViewPortPhotosRanges();
     initTimeout(delayTimeOut, renderExpiredSession);
     installWindowResizeHandler();
@@ -33,6 +35,26 @@ function Init_UI() {
         renderPhotos();
     else
         renderLoginForm();
+
+    start_Periodic_Refresh();
+}
+
+function start_Periodic_Refresh() {
+    setInterval(async () => {
+        let etag = await API.HEAD();
+        if (currentETag != etag) {
+            currentETag = etag;
+            renderPhotos();
+        }
+    },
+        periodicRefreshPeriod * 1000);
+}
+
+function saveContentScrollPosition() {
+    contentScrollPosition = $("#content")[0].scrollTop;
+}
+function restoreContentScrollPosition() {
+    $("#content")[0].scrollTop = contentScrollPosition;
 }
 
 // pour la pagination
@@ -441,6 +463,7 @@ async function renderPhotosList() {
     let photos = await API.GetPhotos();
     if (photos != null) {
         let likes = await API.GetLikes();
+        currentETag = likes.ETag;
         photos.data.forEach(async (photo) => {
             let likeList = [];
             let likeCmd = "likecmd";
@@ -450,7 +473,7 @@ async function renderPhotosList() {
             let date = convertToFrenchDate(photo.Date);
             let photoLikeId = "";
             if (likes) {
-                likes.forEach(async (like) => {
+                likes.data.forEach(async (like) => {
                     if (like.ImageId == photo.Id) {
                         likeList.push(like);
                     }
@@ -525,8 +548,6 @@ async function renderPhotosList() {
         })
         $(".unlikeCmd").on("click", async function () {
             let id = $(this).attr("photoLikeId");
-            //let userId = currentUser.Id;
-            //let likeData = { ImageId: id, userLikeId: userId }
             await API.DeleteLikeById(id);
         })
     }
@@ -716,6 +737,7 @@ function renderVerify() {
 function renderCreateProfil() {
     noTimeout();
     eraseContent();
+    saveContentScrollPosition();
     UpdateHeader("Inscription", "createProfil");
     $("#newPhotoCmd").hide();
     $("#content").append(`
