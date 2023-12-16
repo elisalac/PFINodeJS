@@ -446,7 +446,9 @@ async function renderPhotosList() {
             let likeCmd = "likecmd";
             let boutons = "";
             let partage = "";
+            let likeId = "";
             let date = convertToFrenchDate(photo.Date);
+            let photoLikeId = "";
             if (likes) {
                 likes.forEach(async (like) => {
                     if (like.ImageId == photo.Id) {
@@ -454,12 +456,15 @@ async function renderPhotosList() {
                     }
                 });
             }
-            console.log(likeList);
             if (likeList.length > 0) {
                 likeList.forEach(async (like) => {
                     if (currentUser.Id == like.userLikeId) {
                         likeCmd = "unlikeCmd";
                         likeCss = "fa fa-thumbs-up";
+                        if (like.ImageId == photo.Id) {
+                            likeId = like.Id;
+                            photoLikeId = `photoLikeId=${likeId}`;
+                        }
                     }
                     username = (await API.GetAccount(like.userLikeId)).data.Name;
                     allUser.push(username);
@@ -489,7 +494,7 @@ async function renderPhotosList() {
                         <span class="photoCreationDate">${date}</span>
                         <div class="likesSummary">
                             <span class="photoCreationDate">${likeList.length}</span>
-                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} title="${allUser}"></span>
+                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
                         </div>
                     </div>
                 </div>`
@@ -519,12 +524,11 @@ async function renderPhotosList() {
             await API.AddLike(likeData);
         })
         $(".unlikeCmd").on("click", async function () {
-            let id = $(this).attr("photoId");
-            let userId = currentUser.Id;
-            let likeData = { ImageId: id, userLikeId: userId }
-            await API.DeleteLike(likeData);
+            let id = $(this).attr("photoLikeId");
+            //let userId = currentUser.Id;
+            //let likeData = { ImageId: id, userLikeId: userId }
+            await API.DeleteLikeById(id);
         })
-
     }
     else {
         renderError("Une erreur est survenue");
