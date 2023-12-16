@@ -18,6 +18,12 @@ let HorizontalPhotosCount;
 let VerticalPhotosCount;
 let offset = 0;
 
+//sort css
+let sortByDateCSS = "menuIcon fa fa-fw mx-2";
+let sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
+let sortByLikeCSS = "menuIcon fa fa-fw mx-2";
+let ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+
 Init_UI();
 function Init_UI() {
     getViewPortPhotosRanges();
@@ -69,6 +75,39 @@ function attachCmd() {
     $('#editProfilCmd').on('click', renderEditProfilForm);
     $('#aboutCmd').on("click", renderAbout);
     $('#newPhotoCmd').on("click", renderAddImage);
+    $('#sortByDateCmd').on("click", async function () {
+        sortByDateCSS = "menuIcon fa fa-check mx-2";
+        sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
+        sortByLikeCSS = "menuIcon fa fa-fw mx-2";
+        ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+        await API.GetPhotos("?fields=Date");
+        renderPhotos();
+    });
+    $('#sortByOwnersCmd').on("click", async function () {
+        sortByDateCSS = "menuIcon fa fa-fw mx-2";
+        sortByOwnerCSS = "menuIcon fa fa-check mx-2";
+        sortByLikeCSS = "menuIcon fa fa-fw mx-2";
+        ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+        await API.GetPhotos("?fields=OwnerId");
+        renderPhotos();
+    });
+    $('#sortByLikesCmd').on("click", async function () {
+        sortByDateCSS = "menuIcon fa fa-fw mx-2";
+        sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
+        sortByLikeCSS = "menuIcon fa fa-check mx-2";
+        ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+        renderPhotos();
+    });
+    $('#ownerOnlyCmd').on("click", async function () {
+        sortByDateCSS = "menuIcon fa fa-fw mx-2";
+        sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
+        sortByLikeCSS = "menuIcon fa fa-fw mx-2";
+        ownerOnlyCSS = "menuIcon fa fa-check mx-2";
+
+        let currentUser = await API.retrieveLoggedUser();
+        await API.GetPhotos("&OwnerId=" + { currentUser });
+        renderPhotos();
+    });
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Header management
@@ -104,7 +143,27 @@ function loggedUserMenu() {
 function viewMenu(viewName) {
     if (viewName == "photosList") {
         // todo
-        return "";
+        return `<div class="dropdown-divider"></div> 
+        <span class="dropdown-item" id="sortByDateCmd">
+            <i class="${sortByDateCSS}"></i>
+            <i class="menuIcon fa fa-calendar mx-2"></i>
+            Photos par date de création
+        </span> 
+        <span class="dropdown-item" id="sortByOwnersCmd"> 
+            <i class="${sortByOwnerCSS}"></i> 
+            <i class="menuIcon fa fa-users mx-2"></i> 
+            Photos par créateur 
+        </span> 
+        <span class="dropdown-item" id="sortByLikesCmd"> 
+            <i class="${sortByLikeCSS}"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Photos les plus aiméés 
+        </span> 
+        <span class="dropdown-item" id="ownerOnlyCmd"> 
+            <i class="${ownerOnlyCSS}"></i> 
+            <i class="menuIcon fa fa-user mx-2"></i> 
+            Mes photos 
+        </span>`;
     }
     else
         return "";
@@ -378,26 +437,35 @@ async function renderPhotosList() {
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
     let allUser = [];
-    
+
     let photos = await API.GetPhotos();
     if (photos != null) {
+        let likes = await API.GetLikes();
         photos.data.forEach(async (photo) => {
-            let likes =  await API.GetLikeByPhotoId(photo.Id);
+            let likeList = [];
             let likeCmd = "likecmd";
             let boutons = "";
             let partage = "";
             let date = convertToFrenchDate(photo.Date);
-            if(likes)
-            {
-                likes.forEach(async (like) =>{
-                    if(currentUser.Id == like.userLikeId)
-                    {
-                        likeCmd = "unlikeCmd";
-                        likeCss = "fa fa-thumbs-up"
+            if (likes) {
+                likes.forEach(async (like) => {
+                    if (like.ImageId == photo.Id) {
+                        likeList.push(like);
                     }
-                    username = await API.GetAccount(like.userLikeId).Name
-                    allUser.push(username)
                 });
+            }
+            console.log(likeList);
+            if (likeList.length > 0) {
+                likeList.forEach(async (like) => {
+                    if (currentUser.Id == like.userLikeId) {
+                        likeCmd = "unlikeCmd";
+                        likeCss = "fa fa-thumbs-up";
+                    }
+                    username = (await API.GetAccount(like.userLikeId)).data.Name;
+                    allUser.push(username);
+                })
+            } else {
+                likeCss = "fa-regular fa-thumbs-up";
             }
             if (currentUser.Id == photo.Owner.Id) {
                 boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
@@ -405,33 +473,32 @@ async function renderPhotosList() {
             }
             if (photo.Shared) {
                 partage = `<img class="UserAvatarSmall" src="images/shared.png" />`
-
             }
             if (currentUser.Id == photo.Owner.Id || photo.Shared) {
                 Image += `
                 <div class="photoLayout">
-                <div class="photoTitleContainer">
-                <span class="photoTitle">${photo.Title}</span>
-                    ${boutons}
-                </div>
-                <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
-                <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
-                ${partage}
-                </div>
-                <div style="display:grid; grid-template-columns: 300px 10px 30px;">
-                <span class="photoCreationDate">${date}</span>
-                <div class="likesSummary">
-                <span class="photoCreationDate">${likes.length}</span>
-                <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} title="${allUser}"></span>
-                </div>
-                </div>
+                    <div class="photoTitleContainer">
+                        <span class="photoTitle">${photo.Title}</span>
+                        ${boutons}
+                    </div>
+                    <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
+                        <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+                        ${partage}
+                    </div>
+                    <div style="display:grid; grid-template-columns: 300px 10px 30px;">
+                        <span class="photoCreationDate">${date}</span>
+                        <div class="likesSummary">
+                            <span class="photoCreationDate">${likeList.length}</span>
+                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} title="${allUser}"></span>
+                        </div>
+                    </div>
                 </div>`
             }
-        })
+        });
         $("#content").append(`
             <div id="contentImage" class="photosLayout">
-           ${Image}
-        </div>`
+                ${Image}
+            </div>`
         );
         $(".deleteCmd").on('click', function () {
             let id = $(this).attr("deletePhotoId");
@@ -445,16 +512,16 @@ async function renderPhotosList() {
             let id = $(this).attr("photoId");
             renderPhotoDetail(id);
         })
-        $(".likecmd").on("click",async function(){
+        $(".likecmd").on("click", async function () {
             let id = $(this).attr("photoId");
             let userId = currentUser.Id;
-            let likeData = {ImageId:id,userLikeId:userId}
+            let likeData = { ImageId: id, userLikeId: userId }
             await API.AddLike(likeData);
         })
-        $(".unlikeCmd").on("click",async function(){
+        $(".unlikeCmd").on("click", async function () {
             let id = $(this).attr("photoId");
             let userId = currentUser.Id;
-            let likeData = {ImageId:id,userLikeId:userId}
+            let likeData = { ImageId: id, userLikeId: userId }
             await API.DeleteLike(likeData);
         })
 

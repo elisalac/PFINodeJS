@@ -305,7 +305,7 @@ class API {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: serverHost + photoLikes_API+"?ImageId=" + photoID,
+                url: serverHost + photoLikes_API + "?ImageId=" + photoID,
                 type: 'GET',
                 headers: API.getBearerAuthorizationToken(),
                 success: data => { resolve(data); },
@@ -328,8 +328,21 @@ class API {
             });
         });
     }
-}
 
+    static GetLikes() {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photoLikes_API,
+                type: 'GET',
+                headers: API.getBearerAuthorizationToken(),
+                success: data => { resolve(data); },
+                error: xhr => { API.setHttpErrorState(xhr); resolve(false); }
+            });
+        });
+    }
+
+}
 
 
 ////////////////////// Local storage management/////////////////////////////////////////////////
