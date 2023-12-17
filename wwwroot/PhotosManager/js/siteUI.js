@@ -131,7 +131,7 @@ function attachCmd() {
         sortByLikeCSS = "menuIcon fa fa-fw mx-2";
         ownerOnlyCSS = "menuIcon fa fa-check mx-2";
 
-        let currentUser = await API.retrieveLoggedUser();
+        let currentUser = (await API.retrieveLoggedUser()).Id;
         await API.GetPhotos("&OwnerId=" + { currentUser });
         renderPhotos();
     });
