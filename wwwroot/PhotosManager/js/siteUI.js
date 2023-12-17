@@ -613,7 +613,7 @@ async function renderDeletePhoto(photoId) {
                 </div>
             `);
         $("#deleteImageCmd").on("click", async function () {
-            let photoLike = await API.GetLikeById(photoId);
+            let photoLike = await API.GetLikeByPhotoId(photoId);
             let resultLikeDelete = "";
             if (photoLike) {
                 if (photoLike.data != null) {
