@@ -528,7 +528,7 @@ async function renderPhotosList() {
                             <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
                         </div>
                     </div>
-                </div>`
+                </div>`;
             }
         });
         $("#content").append(`
