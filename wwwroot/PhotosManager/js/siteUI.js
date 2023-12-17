@@ -20,7 +20,8 @@ let HorizontalPhotosCount;
 let VerticalPhotosCount;
 let offset = 0;
 
-//sort css
+//sort
+let queryString = "";
 let sortByDateCSS = "menuIcon fa fa-fw mx-2";
 let sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
 let sortByLikeCSS = "menuIcon fa fa-fw mx-2";
@@ -107,7 +108,7 @@ function attachCmd() {
         sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
         sortByLikeCSS = "menuIcon fa fa-fw mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
-        await API.GetPhotos("?fields=Date");
+        queryString = "?sort=Date";
         renderPhotos();
     });
     $('#sortByOwnersCmd').on("click", async function () {
@@ -115,7 +116,7 @@ function attachCmd() {
         sortByOwnerCSS = "menuIcon fa fa-check mx-2";
         sortByLikeCSS = "menuIcon fa fa-fw mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
-        await API.GetPhotos("?fields=OwnerId");
+        queryString = "?sort=OwnerId";
         renderPhotos();
     });
     $('#sortByLikesCmd').on("click", async function () {
@@ -123,6 +124,7 @@ function attachCmd() {
         sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
         sortByLikeCSS = "menuIcon fa fa-check mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+        queryString = "";
         renderPhotos();
     });
     $('#ownerOnlyCmd').on("click", async function () {
@@ -132,7 +134,7 @@ function attachCmd() {
         ownerOnlyCSS = "menuIcon fa fa-check mx-2";
 
         let currentUser = (await API.retrieveLoggedUser()).Id;
-        await API.GetPhotos("&OwnerId=" + { currentUser });
+        queryString = "?OwnerId=" + currentUser;
         renderPhotos();
     });
 }
@@ -464,7 +466,7 @@ async function renderPhotosList() {
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
 
-    let photos = await API.GetPhotos();
+    let photos = await API.GetPhotos(queryString);
     if (photos != null) {
         let likes = await API.GetLikes();
         currentETag = likes.ETag;
