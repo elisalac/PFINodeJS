@@ -9,11 +9,24 @@ class API {
         this.currentStatus = 0;
         this.error = false;
     }
-    static async HEAD() {
+    static async HEADLikes() {
         API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + photoLikes_API,
+                type: 'HEAD',
+                contentType: 'text/plain',
+                headers: API.getBearerAuthorizationToken(),
+                complete: data => { resolve(data.getResponseHeader('ETag')); },
+                error: (xhr) => { console.log(xhr); resolve(null); }
+            });
+        });
+    }
+    static async HEADphotos() {
+        API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: serverHost + photos_API,
                 type: 'HEAD',
                 contentType: 'text/plain',
                 headers: API.getBearerAuthorizationToken(),

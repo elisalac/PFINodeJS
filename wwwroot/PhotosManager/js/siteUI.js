@@ -8,6 +8,7 @@ let Email = "";
 let EmailError = "";
 let passwordError = "";
 let currentETag = "";
+let currentEtagPhoto
 let currentViewName = "photosList";
 let delayTimeOut = 200; // seconds
 let refreshIntervalId = "";
@@ -29,7 +30,7 @@ let ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
 
 Init_UI();
 async function Init_UI() {
-    currentETag = await API.HEAD();
+    currentETag = await API.HEADLikes();
     getViewPortPhotosRanges();
     initTimeout(delayTimeOut, renderExpiredSession);
     installWindowResizeHandler();
@@ -38,15 +39,21 @@ async function Init_UI() {
     else
         renderLoginForm();
 
-    //start_Periodic_Refresh();
+    start_Periodic_Refresh();
 }
 
 function start_Periodic_Refresh() {
     refreshIntervalId = setInterval(async () => {
-        let etag = await API.HEAD();
-        if (currentETag != etag) {
+        let etaglikes = await API.HEADLikes();
+        let etagphoto = await API.HEADphotos();
+        if (currentETag != etaglikes) {
             currentETag = etag;
             renderPhotos();
+        }
+        if(currentEtagPhoto != etagphoto)
+        {
+            currentEtagPhoto = etagphoto
+            renderPhotos()
         }
     },
         periodicRefreshPeriod * 1000);
@@ -94,10 +101,19 @@ function installWindowResizeHandler() {
     });
 }
 function attachCmd() {
+
     $('#loginCmd').on('click', renderLoginForm);
     $('#logoutCmd').on('click', logout);
     $('#listPhotosCmd').on('click', renderPhotos);
-    $('#listPhotosMenuCmd').on('click', renderPhotos);
+    $('#listPhotosMenuCmd').on('click', function(){
+        sortByDateCSS = "menuIcon fa fa-fw mx-2";
+        sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
+        sortByLikeCSS = "menuIcon fa fa-fw mx-2";
+        ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
+        queryString ="";
+        renderPhotos("")
+        
+    });
     $('#editProfilMenuCmd').on('click', renderEditProfilForm);
     $('#renderManageUsersMenuCmd').on('click', renderManageUsers);
     $('#editProfilCmd').on('click', renderEditProfilForm);
@@ -124,7 +140,7 @@ function attachCmd() {
         sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
         sortByLikeCSS = "menuIcon fa fa-check mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
-        queryString = "";
+        queryString = "?sort=nbLike";
         renderPhotos();
     });
     $('#ownerOnlyCmd').on("click", async function () {
@@ -1176,7 +1192,8 @@ function renderAddImage() {
             } else {
                 data.Shared = false;
             }
-            data.Date = nowInSeconds();
+            let nowDate = new Date();
+            data.Date = nowDate.getTime();
             event.preventDefault();
             let result = await API.CreatePhoto(data);
             if (result) {
