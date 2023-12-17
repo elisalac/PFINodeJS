@@ -1,8 +1,8 @@
 ////////////////////////////////////////////// API photos_APIs call ///////////////////////////////////////////////////////
-
 const serverHost = "http://localhost:5000";
 const photos_API = "/api/photos";
 const photoLikes_API = "/api/photolikes";
+
 class API {
     static initHttpState() {
         this.currentHttpError = "";
