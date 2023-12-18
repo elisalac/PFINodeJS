@@ -30,7 +30,6 @@ let ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
 
 Init_UI();
 async function Init_UI() {
-    currentETag = await API.HEADLikes();
     getViewPortPhotosRanges();
     initTimeout(delayTimeOut, renderExpiredSession);
     installWindowResizeHandler();
@@ -44,17 +43,20 @@ async function Init_UI() {
 
 function start_Periodic_Refresh() {
     refreshIntervalId = setInterval(async () => {
-        let etaglikes = await API.HEADLikes();
-        let etagphoto = await API.HEADphotos();
-        if (currentETag != etaglikes) {
-            currentETag = etag;
-            renderPhotos();
+        let user = await API.retrieveLoggedUser()
+        if (user != null) {
+            let etaglikes = await API.HEADLikes();
+            let etagphoto = await API.HEADphotos();
+            if (currentETag != etaglikes) {
+                currentETag = etaglikes;
+                renderPhotos();
+            }
+            if (currentEtagPhoto != etagphoto) {
+                currentEtagPhoto = etagphoto
+                renderPhotos()
+            }
         }
-        if(currentEtagPhoto != etagphoto)
-        {
-            currentEtagPhoto = etagphoto
-            renderPhotos()
-        }
+
     },
         periodicRefreshPeriod * 1000);
 }
@@ -96,7 +98,7 @@ function installWindowResizeHandler() {
         if ($('#photosLayout') != null) {
             getViewPortPhotosRanges();
             if (currentViewName == "photosList")
-                renderPhotosList();
+                renderPhotosList(true);
         }
     });
 }
@@ -105,14 +107,14 @@ function attachCmd() {
     $('#loginCmd').on('click', renderLoginForm);
     $('#logoutCmd').on('click', logout);
     $('#listPhotosCmd').on('click', renderPhotos);
-    $('#listPhotosMenuCmd').on('click', function(){
+    $('#listPhotosMenuCmd').on('click', function () {
         sortByDateCSS = "menuIcon fa fa-fw mx-2";
         sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
         sortByLikeCSS = "menuIcon fa fa-fw mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
-        queryString ="";
+        queryString = "";
         renderPhotos("")
-        
+
     });
     $('#editProfilMenuCmd').on('click', renderEditProfilForm);
     $('#renderManageUsersMenuCmd').on('click', renderManageUsers);
@@ -140,7 +142,7 @@ function attachCmd() {
         sortByOwnerCSS = "menuIcon fa fa-fw mx-2";
         sortByLikeCSS = "menuIcon fa fa-check mx-2";
         ownerOnlyCSS = "menuIcon fa fa-fw mx-2";
-        queryString = "?sort=nbLike";
+        queryString = "?sort=nbLike desc";
         renderPhotos();
     });
     $('#ownerOnlyCmd').on("click", async function () {
@@ -335,34 +337,10 @@ async function createProfil(profil) {
     }
 }
 async function adminDeleteAccount(userId) {
-    let photos = await API.GetPhotos();
-    if (photos) {
-        if (photos.data != null) {
-            photos.data.forEach(async (photo) => {
-                let likes = await API.GetLikeById(photo.Id);
-                if (likes) {
-                    if (likes.data) {
-                        likes.data.forEach(async (like) => {
-                            let resultLike = await API.DeleteLikeById(like.Id);
-                            if (resultLike) {
-                                if (photo.OwnerId == userId) {
-                                    let result = await API.DeletePhoto(photo.Id);
-                                    if (result) {
-                                        if (await API.unsubscribeAccount(userId)) {
-                                            renderManageUsers();
-                                        } else {
-                                            renderError("Un problème est survenu.");
-                                        }
-                                    } else {
-                                        renderError("Un problème est survenu.");
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-        }
+    if (await API.unsubscribeAccount(userId)) {
+        renderManageUsers();
+    } else {
+        renderError("Un problème est survenu.");
     }
 }
 async function deleteProfil() {
@@ -470,136 +448,218 @@ async function renderPhotos() {
     $("#newPhotoCmd").show();
     $("#abort").hide();
     let loggedUser = API.retrieveLoggedUser();
-    if (loggedUser)
-        renderPhotosList();
+    if (loggedUser) {
+        currentETag = await API.HEADLikes();
+        currentEtagPhoto = await API.HEADphotos()
+        renderPhotosList(true);
+    }
+
     else {
         renderLoginForm();
     }
 }
-async function renderPhotosList() {
-    eraseContent();
+async function renderPhotosList(refreshed = false) {
+    //eraseContent();
+    endOfData = false
     let currentUser = await API.retrieveLoggedUser();
+
     let Image = "";
     let likeCss = "fa-regular fa-thumbs-up";
 
-    let photos = await API.GetPhotos(queryString);
-    if (photos != null) {
-        let likes = await API.GetLikes();
-        currentETag = likes.ETag;
-        photos.data.forEach(async (photo) => {
-            let allUser = [];
-            let likeCmd = "likecmd";
-            let boutons = "";
-            let partage = "";
-            let likeId = "";
-            let date = convertToFrenchDate(photo.Date);
-            let photoLikeId = "";
-            let username = "";
-            let likeList = likes.data.filter(like => like.ImageId == photo.Id);
-            let previousOwnerName = "";
-            if (likeList.length > 0) {
-                likeList.forEach(async (like) => {
-                    if (currentUser.Id == like.userLikeId) {
-                        likeCmd = "unlikeCmd";
-                        likeCss = "fa fa-thumbs-up";
-                        if (like.ImageId == photo.Id) {
-                            likeId = like.Id;
-                            photoLikeId = `photoLikeId=${likeId}`;
-                        }
+    let nbPhotos = limit * (offset + 1);
+    let query = refreshed ? "?limit=" + nbPhotos + "&offset=" + + 0 + queryString : "?limit=" + limit + "&offset=" + offset + queryString;
+    let photos = await API.GetPhotos(query);
+
+    if (!endOfData) {
+        if (photos != null) {
+            if (refreshed) {
+                if (contentScrollPosition != 0) {
+                    restoreContentScrollPosition();
+                }
+                else {
+                    saveContentScrollPosition();
+                }
+                eraseContent();
+                $("#content").append($(`<div id='contentImage' class="photosLayout">`));
+            }
+            let likes = await API.GetLikes();
+            if (photos.data.length > 0) {
+
+                photos.data.forEach(async (photo) => {
+                    let allUser = [];
+                    let username = "";
+                    let likeList = likes.data.filter(like => like.ImageId == photo.Id);
+                    let previousOwnerName = "";
+
+                    let likeCmd = "likecmd";
+                    let boutons = "";
+                    let partage = "";
+                    let likeId = "";
+                    let photoLikeId = "";
+                    let date = convertToFrenchDate(photo.Date);
+
+                    if (likeList.length > 0) {
+                        likeList.forEach(async (like) => {
+                            if (currentUser.Id == like.userLikeId) {
+                                likeCmd = "unlikeCmd";
+                                likeCss = "fa fa-thumbs-up";
+                                if (like.ImageId == photo.Id) {
+                                    likeId = like.Id;
+                                    photoLikeId = `photoLikeId=${likeId}`;
+                                }
+                            } else {
+                                likeCss = "fa-regular fa-thumbs-up";
+                            }
+                            if (like.ImageId == photo.Id) {
+                                username = like.OwnerName;
+                                if (previousOwnerName != username) {
+                                    allUser.push("\n" + username);
+                                    previousOwnerName = username;
+                                }
+                            }
+                        })
                     } else {
                         likeCss = "fa-regular fa-thumbs-up";
                     }
-                    if (like.ImageId == photo.Id) {
-                        username = like.OwnerName;
-                        if (previousOwnerName != username) {
-                            allUser.push("\n" + username);
-                            previousOwnerName = username;
-                        }
-                    }
-                })
-            } else {
-                likeCss = "fa-regular fa-thumbs-up";
-            }
 
-            if (currentUser.Id == photo.Owner.Id) {
-                boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
-            <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
-            }
-            if (photo.Shared) {
-                partage = `<img class="UserAvatarSmall" src="images/shared.png" />`
-            }
-            if (currentUser.Id == photo.Owner.Id || photo.Shared) {
-                Image += `
-                <div class="photoLayout">
-                    <div class="photoTitleContainer">
-                        <span class="photoTitle">${photo.Title}</span>
-                        ${boutons}
-                    </div>
-                    <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
-                        <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
-                        ${partage}
-                    </div>
-                    <div style="display:grid; grid-template-columns: 300px 10px 30px;">
-                        <span class="photoCreationDate">${date}</span>
-                        <div class="likesSummary">
-                            <span class="photoCreationDate">${likeList.length}</span>
-                            <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
+                    if (currentUser.Id == photo.Owner.Id) {
+                        boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
+                <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
+                    }
+                    if (photo.Shared) {
+                        partage = `<img class="UserAvatarSmall" src="images/shared.png" />`
+                    }
+                    if (currentUser.Id == photo.Owner.Id || photo.Shared) {
+                        Image += `
+                    <div class="photoLayout">
+                        <div class="photoTitleContainer">
+                            <span class="photoTitle">${photo.Title}</span>
+                            ${boutons}
                         </div>
-                    </div>
-                </div>`;
+                        <div class="photoImage" photoId=${photo.Id}  style="background-image:url('${photo.Image}')">
+                            <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+                            ${partage}
+                        </div>
+                        <div style="display:grid; grid-template-columns: 300px 10px 30px;">
+                            <span class="photoCreationDate">${date}</span>
+                            <div class="likesSummary">
+                                <span class="photoCreationDate">${likeList.length}</span>
+                                <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
+                            </div>
+                        </div>
+                    </div>`;
+                    }
+                });
+                $("#content").on("scroll", function () {
+                    if ($("#content").scrollTop() + $("#content").innerHeight() > ($("#contentImage").height() - photoContainerHeight)) {
+                        $("#content").off();
+                        offset++;
+                        renderPhotosList();
+                    }
+                });
             }
-        });
-        $("#content").append(`
+            else {
+                endOfData = true;
+            }
+            $("#content").append(`
             <div id="contentImage" class="photosLayout">
                 ${Image}
             </div>`
-        );
+            );
+            restoreContentScrollPosition();
+            $(".deleteCmd").on('click', function () {
+                let id = $(this).attr("deletePhotoId");
+                renderDeletePhoto(id);
+            })
+            $(".editCmd").on("click", function () {
+                let id = $(this).attr("editPhotoId");
+                renderModifyPhoto(id);
+            })
+            $(".photoImage").on('click', function () {
+                let id = $(this).attr("photoId");
+                renderPhotoDetail(id);
+            })
+            $(".likecmd").on("click", async function () {
+                let id = $(this).attr("photoId");
+                let userId = currentUser.Id;
+                let likeData = { ImageId: id, userLikeId: userId };
+                await API.AddLike(likeData);
+            })
+            $(".unlikeCmd").on("click", async function () {
+                let id = $(this).attr("photoLikeId");
+                await API.DeleteLikeById(id);
+            })
+
+        }
+        else {
+            renderError("Une erreur est survenue");
+        }
+    }
+    if (refreshed)
         restoreContentScrollPosition();
-        $(".deleteCmd").on('click', function () {
-            let id = $(this).attr("deletePhotoId");
-            renderDeletePhoto(id);
-        })
-        $(".editCmd").on("click", function () {
-            let id = $(this).attr("editPhotoId");
-            renderModifyPhoto(id);
-        })
-        $(".photoImage").on('click', function () {
-            let id = $(this).attr("photoId");
-            renderPhotoDetail(id);
-        })
-        $(".likecmd").on("click", async function () {
-            let id = $(this).attr("photoId");
-            let userId = currentUser.Id;
-            let likeData = { ImageId: id, userLikeId: userId };
-            await API.AddLike(likeData);
-        })
-        $(".unlikeCmd").on("click", async function () {
-            let id = $(this).attr("photoLikeId");
-            await API.DeleteLikeById(id);
-        })
-    }
-    else {
-        renderError("Une erreur est survenue");
-    }
+
 }
 async function renderPhotoDetail(id) {
     timeout();
     eraseContent();
+    let likeCmd = "likeCmd";
+    let previousOwnerName= ""
+    let likes = await API.GetLikes();
     let photo = await API.GetPhotosById(id);
+    let allUser = [];
     if (photo != null) {
         let date = convertToFrenchDate(photo.Date);
         eraseContent();
-        $("#content").append(`
+        let likeCss = "fa-regular fa-thumbs-up";
+        currentETag = likes.ETag;
+        let photoLikeId = await API.GetLikeByPhotoId(id);
+        if(photoLikeId != null)
+        {
+            if (photoLikeId.length > 0) {
+                likeCss = "fa fa-thumbs-up";
+                likeCmd = "unlikeCmd"
+                photoLikeId.forEach(like =>{
+                    username = like.OwnerName;
+                    if (previousOwnerName != username) {
+                        allUser.push("\n" + username);
+                        previousOwnerName = username;
+                    }
+
+                })
+            }
+            $("#content").append(`
             <div class="photoDetailsOwner">
-                <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
-                <span style="margin-left:10px"> ${photo.Owner.Name}</span>       
+            <img class="UserAvatarSmall" src="${photo.Owner.Avatar}" />
+            <span style="margin-left:10px"> ${photo.Owner.Name}</span>       
             </div>
             <hr>
             <span class="photoDetailsTitle">${photo.Title}</span>
             <img class="photoDetailsLargeImage" src="${photo.Image}" />
-            <span class="photoDetailsCreationDate">${date}</span>
+            <div style="display:grid; grid-template-columns: 950px 10px 30px;">
+                                    <span class="photoCreationDate">${date}</span>
+                                    <div class="likesSummary">
+                                        <span class="photoCreationDate">${photoLikeId.length}</span>
+                                        <span class="${likeCmd} cmdIcon ${likeCss}" photoId=${photo.Id} ${photoLikeId} title="${allUser}"></span>
+                                    </div>
+            </div>
             <div class="photoDetailsDescription">${photo.Description}</div>
-        `);
+            
+            `);
+        }
+        
+       
+        $(".likeCmd").on("click", async function () {
+            let id = $(this).attr("photoId");
+            let userId = currentUser.Id;
+            let likeData = { ImageId: id, userLikeId: userId };
+            likeCss="fa fa-thumbs-up";
+            await API.AddLike(likeData);
+            })
+            $(".unlikeCmd").on("click", async function () {
+            let id = $(this).attr("photoLikeId");
+            likeCss = "fa-regular fa-thumbs-up";
+            await API.DeleteLikeById(id);
+            })
     }
     else {
         renderError("Description introuvable!");
@@ -629,22 +689,9 @@ async function renderDeletePhoto(photoId) {
                 </div>
             `);
         $("#deleteImageCmd").on("click", async function () {
-            let photoLike = await API.GetLikeByPhotoId(photoId);
-            let resultLikeDelete = "";
-            if (photoLike) {
-                if (photoLike.data != null) {
-                    photoLike.data.forEach(async (like) => {
-                        resultLikeDelete = await API.DeleteLikeById(like.Id);
-                    });
-                    if (resultLikeDelete) {
-                        let result = await API.DeletePhoto(photoId);
-                        if (result) {
-                            renderPhotos();
-                        } else {
-                            renderError("Une erreur est survenue");
-                        }
-                    }
-                }
+            let result = await API.DeletePhoto(photoId);
+            if (result) {
+                renderPhotos();
             } else {
                 renderError("Une erreur est survenue");
             }

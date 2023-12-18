@@ -6,11 +6,16 @@ import * as utilities from "../utilities.js";
 import Gmail from "../gmail.js";
 import Controller from './Controller.js';
 import Authorizations from '../authorizations.js';
+import Photo from '../models/photo.js';
+import PhotoLikeModel from '../models/photoLike.js';
+
 
 export default class AccountsController extends Controller {
     constructor(HttpContext) {
         super(HttpContext, new Repository(new UserModel()), Authorizations.admin());
         this.tokensRepository = new Repository(new TokenModel());
+        this.photoRepository = new Repository(new Photo());
+        this.photoLikeRepository = new Repository(new PhotoLikeModel());
     }
     index(id) {
         if (id != undefined) {
@@ -200,6 +205,8 @@ export default class AccountsController extends Controller {
     remove(id) { // warning! this is not an API endpoint
         if (Authorizations.writeGranted(this.HttpContext, Authorizations.user())) {
             this.tokensRepository.keepByFilter(token => token.User.Id != id);
+            this.photoLikeRepository.keepByFilter(like => like.userLikeId != id);
+            this.photoRepository.keepByFilter(photo => photo.OwnerId != id);
             let previousAuthorization = this.authorizations;
             this.authorizations = Authorizations.user();
             super.remove(id);

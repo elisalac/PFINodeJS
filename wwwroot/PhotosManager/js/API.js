@@ -10,7 +10,6 @@ class API {
         this.error = false;
     }
     static async HEADLikes() {
-        API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + photoLikes_API,
@@ -23,7 +22,6 @@ class API {
         });
     }
     static async HEADphotos() {
-        API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
                 url: serverHost + photos_API,
@@ -253,8 +251,8 @@ class API {
             });
         });
     }
-    static GetPhotos(queryString = null) {
-        let url = serverHost + photos_API + (queryString ? queryString : "");
+    static GetPhotos(queryString = "") {
+        let url = serverHost + photos_API + queryString;
         return new Promise(resolve => {
             $.ajax({
                 url: url,
