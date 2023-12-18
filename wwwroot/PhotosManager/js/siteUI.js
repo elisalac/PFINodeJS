@@ -522,7 +522,7 @@ async function renderPhotosList(refreshed = false) {
                         likeCss = "fa-regular fa-thumbs-up";
                     }
 
-                    if (currentUser.Id == photo.Owner.Id) {
+                    if (currentUser.Id == photo.Owner.Id || (currentUser.Authorizations.readAccess == 2 && currentUser.Authorizations.writeAccess == 2)) {
                         boutons = `<span class="editCmd cmdIcon fa fa-pencil" editPhotoId="${photo.Id}" title="Modifier ${photo.Title}"></span>
                 <span class="deleteCmd cmdIcon fa fa-trash" deletePhotoId="${photo.Id}" title="Effacer ${photo.Title}"></span>`;
                     }
