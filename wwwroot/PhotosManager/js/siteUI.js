@@ -603,7 +603,7 @@ async function renderPhotoDetail(id) {
     timeout();
     eraseContent();
     let likeCmd = "likeCmd";
-    let previousOwnerName= ""
+    let previousOwnerName = ""
     let likes = await API.GetLikes();
     let photo = await API.GetPhotosById(id);
     let allUser = [];
@@ -613,12 +613,11 @@ async function renderPhotoDetail(id) {
         let likeCss = "fa-regular fa-thumbs-up";
         currentETag = likes.ETag;
         let photoLikeId = await API.GetLikeByPhotoId(id);
-        if(photoLikeId != null)
-        {
+        if (photoLikeId != null) {
             if (photoLikeId.length > 0) {
                 likeCss = "fa fa-thumbs-up";
                 likeCmd = "unlikeCmd"
-                photoLikeId.forEach(like =>{
+                photoLikeId.forEach(like => {
                     username = like.OwnerName;
                     if (previousOwnerName != username) {
                         allUser.push("\n" + username);
@@ -646,20 +645,20 @@ async function renderPhotoDetail(id) {
             
             `);
         }
-        
-       
+
+
         $(".likeCmd").on("click", async function () {
             let id = $(this).attr("photoId");
             let userId = currentUser.Id;
             let likeData = { ImageId: id, userLikeId: userId };
-            likeCss="fa fa-thumbs-up";
+            likeCss = "fa fa-thumbs-up";
             await API.AddLike(likeData);
-            })
-            $(".unlikeCmd").on("click", async function () {
+        })
+        $(".unlikeCmd").on("click", async function () {
             let id = $(this).attr("photoLikeId");
             likeCss = "fa-regular fa-thumbs-up";
             await API.DeleteLikeById(id);
-            })
+        })
     }
     else {
         renderError("Description introuvable!");
@@ -768,7 +767,8 @@ async function renderModifyPhoto(photoId) {
             } else {
                 data.Shared = false;
             }
-            data.Date = nowInSeconds();
+            let nowDate = new Date();
+            data.Date = nowDate.getTime();
             event.preventDefault();
             let result = await API.UpdatePhoto(data);
             if (result) {
